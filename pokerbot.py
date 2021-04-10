@@ -34,6 +34,8 @@ class PokerBot(BasePokerPlayer):
         self.opponent_hand = []
         self.score = 0
         self.tb = Table()
+        self.wins = 0
+        self.losses = 0
 
 
     def set_algorithm(self, algID):
@@ -55,22 +57,12 @@ class PokerBot(BasePokerPlayer):
         #self.bluff(play_suggestion, util)
     '''
 
-<<<<<<< HEAD
-    # Four algorithm implementations go here.
-    # Return expected value of return to pass to bluff
     def minimax(self, players, player_pos, numberOfPlayers, sb_amount = 0, depth = 1, current_depth = 0):
-
-        community = table.Table.get_community_card(self)
-        hole = players[player_pos].hole_card
-=======
-    #def minimax(self, info_to_pass):
-    def minimax(self, players, player_pos, depth, current_depth, numberOfPlayers, sb_amount = 0):
         # Four algorithm implementations go here.
         # Return expected value of return to pass to bluff
         #play_suggestion = None; util = 0
         community = self.round_state['community_card']
         hole = self.hole_card
->>>>>>> 82e9c4c808464e9426375f9a5734e3371696c3b4
         current_depth += 1
         score = 0
 
@@ -173,10 +165,7 @@ class PokerBot(BasePokerPlayer):
                 next_action = PokerConstants.Action.FOLD
         return next_action, amount
 
-<<<<<<< HEAD
     
-=======
->>>>>>> 82e9c4c808464e9426375f9a5734e3371696c3b4
     def declare_action(self, valid_actions, hole_card, round_state):
         # a valid action is a dictionary (tuple?) of the form {'action': 'fold', 'amount': 2}
         # needs both action name (fold, call, raise) and an amount
@@ -186,12 +175,7 @@ class PokerBot(BasePokerPlayer):
         # valid_actions format => [raise_action_info, call_action_info, fold_action_info]
         call_action_info = valid_actions[1]
         #action, amount = call_action_info["action"], call_action_info["amount"]
-<<<<<<< HEAD
-        return self.minimax(self.opponent_state, 1, len(self.opponent_state), 100)  # action returned here is sent to the poker engine
-    
-=======
         return self.minimax(self.opponent_state, 1, 2, -1, len(self.opponent_state), 100)  # action returned here is sent to the poker engine
->>>>>>> 82e9c4c808464e9426375f9a5734e3371696c3b4
 
     def receive_game_start_message(self, game_info):
         self.game_info = game_info
@@ -215,7 +199,8 @@ class PokerBot(BasePokerPlayer):
         self.winners = winners
         self.opponent_hand = hand_info
         self.round_state = round_state
-        
+
+        is_winner = self.uuid in [item['uuid'] for item in winners]
         self.wins += int(is_winner)
         self.losses += int(not is_winner)
         
