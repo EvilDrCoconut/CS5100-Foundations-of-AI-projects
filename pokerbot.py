@@ -1,9 +1,17 @@
 import random
+
 from pypokerengine.players import BasePokerPlayer
 from pypokerengine.engine.poker_constants import PokerConstants
 import pypokerengine.engine.action_checker
 from pypokerengine.utils.card_utils import _pick_unused_card, _fill_community_card, gen_cards
 from pypokerengine.engine.hand_evaluator import HandEvaluator
+from pypokerengine.engine import action_checker
+from pypokerengine.engine import dealer
+from pypokerengine.engine import player
+from pypokerengine.utils import action_utils
+from pypokerengine.engine import table
+
+import unittest
 
 class PokerBot(BasePokerPlayer):
     def __init__(self, startingAlg=-1):
@@ -22,6 +30,7 @@ class PokerBot(BasePokerPlayer):
         self.new_action = {} # new action is the same as a valid action with a user id in front position
         self.winners = {} # similar to an entry in opponent_state but with bot itself as a possiblity
         self.opponent_hand = []
+        self.score = 0
 
 
     def set_algorithm(self, algID):
@@ -29,7 +38,7 @@ class PokerBot(BasePokerPlayer):
         self.algID = algID
 
 
-
+    '''
     def run_algorithm(self, info_to_pass):
         if self.algID == 0:
             play_suggestion, util = self.minimax(info_to_pass)
@@ -40,21 +49,53 @@ class PokerBot(BasePokerPlayer):
         elif self.algID == 3:
             play_suggestion, util = self.alphaBeta(info_to_pass)
 
-        self.bluff(play_suggestion, util)
+        #self.bluff(play_suggestion, util)
+    '''
 
-    def minimax(self, info_to_pass):
+    #def minimax(self, info_to_pass):
+    def minimax(self, players, player_pos, depth, current_depth, depthNumber, sb_amount = 0):
         # Four algorithm implementations go here.
         # Return expected value of return to pass to bluff
-        play_suggestion = None
-        return play_suggestion, util
+        #play_suggestion = None; util = 0
+        community = table.Table.get_community_card(self)
+        hole = players[player_pos].hole_card
+        current_depth += 1
+        score = 0
+
+        if depth * depthNumber == current_depth:
+            return self.bluff(score, hole, community), score
+        
+        if current_depth == depthNumber or current_depth == 0:
+            score = float('-Inf')
+            for action in action_utils.generate_legal_actions(players, player_pos, sb_amount):
+                result, max_move = self.minimax(players, table.Table.next_active_player_pos(self, player_pos), depth, current_depth, depthNumber)
+                if result > score:
+                    score = result
+                    move = action
+                    self.score = score
+
+            move = self.bluff(score, hole, community)
+            return move, score
+
+        else:
+            score = float('Inf')
+            for action in action_utils.generate_legal_actions(players, player_pos, sb_amount):
+                result, min_move = self.minimax(players, table.Table.next_ask_waiting_player_pos(self, player_pos), depth, current_depth, depthNumber)
+                if result < score:
+                    score = result
+                    move = action
+            move = self.bluff(score, hole, community)
+            return move, score
+            #return play_suggestion, util
+    
     def expectimax(self, info_to_pass):
-        play_suggestion = None
+        play_suggestion = None; util = 0
         return play_suggestion, util
     def mdp(self, info_to_pass):
-        play_suggestion = None
+        play_suggestion = None; util = 0
         return play_suggestion, util
     def alphaBeta(self, info_to_pass):
-        play_suggestion = None
+        play_suggestion = None; util = 0
         return play_suggestion, util
 
     def estimate_win_rate(self, nb_simulation, nb_player, hole_card, community_card=None):
@@ -81,18 +122,17 @@ class PokerBot(BasePokerPlayer):
     def bluff(self, score, hole, community):
 
         cards = hole + community
-        raise_discount = .9
-        all_in_discount = .2
-        next_action = PokerConstants.Action.CALL
+        raise_discount = .9; all_in_discount = .2
+        next_action = PokerConstants.Action.CALL; amount = 0
 
-        if self.__is_straightflash(cards): score = score * 25
-        if self.__is_fourcard(cards): score = score * 20
-        if self.__is_fullhouse(cards): score = score * 14
-        if self.__is_flash(cards): score = score * 10
-        if self.__is_straight(cards): score = score * 8
-        if self.__is_threecard(cards): score = score * 5
-        if self.__is_twopair(cards): score = score * 3
-        if self.__is_onepair(cards): score = score * 2
+        if HandEvaluator.__is_straightflash(cards): score = score * 25
+        if HandEvaluator.__is_fourcard(cards): score = score * 20
+        if HandEvaluator.__is_fullhouse(cards): score = score * 14
+        if HandEvaluator.__is_flash(cards): score = score * 10
+        if HandEvaluator.__is_straight(cards): score = score * 8
+        if HandEvaluator.__is_threecard(cards): score = score * 5
+        if HandEvaluator.__is_twopair(cards): score = score * 3
+        if HandEvaluator.__is_onepair(cards): score = score * 2
 
         for opp in self.opponent_state:
             if opp == PokerConstants.Action.FOLD:
@@ -104,7 +144,7 @@ class PokerBot(BasePokerPlayer):
             elif opp == PokerConstants.Action.ANTE:
                 score = score * all_in_discount
 
-        if score > 250:
+        if score*raise_discount > 250:
             next_action = PokerConstants.Action.RAISE
         elif 250 > score > 100:
             next_action = PokerConstants.Action.CALL
@@ -113,7 +153,7 @@ class PokerBot(BasePokerPlayer):
                 next_action = PokerConstants.Action.CALL
             else:
                 next_action = PokerConstants.Action.FOLD
-        return next_action
+        return next_action, amount
 
     def declare_action(self, valid_actions, hole_card, round_state):
         # a valid action is a dictionary (tuple?) of the form {'action': 'fold', 'amount': 2}

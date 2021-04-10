@@ -39,9 +39,8 @@ def Poker_Bot(self):
     def bluff(score, hole, community):
 
         cards = hole + community
-        raise_discount = .9
-        all_in_discount = .2
-        next_action = PokerConstants.Action.CALL
+        raise_discount = .9; all_in_discount = .2
+        next_action = 'call'; amount = None
 
         if self.__is_straightflash(cards): score = score * 25
         if self.__is_fourcard(cards): score = score * 20
@@ -62,13 +61,20 @@ def Poker_Bot(self):
             elif opp == PokerConstants.Action.ANTE:
                 score = score * all_in_discount
 
-        if score > 250:
-            next_action = PokerConstants.Action.RAISE
+        if score*raise_discount > 250:
+            if score > 500:
+                next_action = 'raise'
+                amount =  'max'
+            else:
+                next_action = 'raise'
+                amount = 'min'
         elif 250 > score > 100:
-            next_action = PokerConstants.Action.CALL
+            next_action = 'call'
         else:
             if len(community) > 4:
-                next_action = PokerConstants.Action.CALL
+                next_action = 'call'
             else:
-                next_action = PokerConstants.Action.FOLD
-        return next_action
+                next_action = 'fold'
+                amount = 0
+                
+        return next_action, amount
