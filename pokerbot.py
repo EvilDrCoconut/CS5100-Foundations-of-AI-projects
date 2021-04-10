@@ -54,18 +54,17 @@ class PokerBot(BasePokerPlayer):
         #self.bluff(play_suggestion, util)
     '''
 
-    #def minimax(self, info_to_pass):
-    def minimax(self, players, player_pos, depth, current_depth, numberOfPlayers, sb_amount = 0):
-        # Four algorithm implementations go here.
-        # Return expected value of return to pass to bluff
-        #play_suggestion = None; util = 0
+    # Four algorithm implementations go here.
+    # Return expected value of return to pass to bluff
+    def minimax(self, players, player_pos, numberOfPlayers, sb_amount = 0, depth = 1, current_depth = 0):
+
         community = table.Table.get_community_card(self)
         hole = players[player_pos].hole_card
         current_depth += 1
         score = 0
 
         if depth * numberOfPlayers == current_depth:
-            return self.bluff(score, hole, community), score
+            return self.bluff(score, hole, community)
         
         if current_depth == numberOfPlayers or current_depth == 0:
             score = float('-Inf')
@@ -157,47 +156,6 @@ class PokerBot(BasePokerPlayer):
                 next_action = PokerConstants.Action.FOLD
         return next_action, amount
 
-    '''
-    # used for comparison testing purposes
-    def declare_action(self, valid_actions, hole_card, round_state):
-        # Estimate the win rate
-        #print(round_state['community_card'])
-        win_rate = self.estimate_win_rate(100, self.num_players, hole_card, round_state['community_card'])
-
-        # Check whether it is possible to call
-        can_call = len([item for item in valid_actions if item['action'] == 'call']) > 0
-        if can_call:
-            # If so, compute the amount that needs to be called
-            call_amount = [item for item in valid_actions if item['action'] == 'call'][0]['amount']
-        else:
-            call_amount = 0
-
-        amount = None
-
-        # If the win rate is large enough, then raise
-        if win_rate > 0.5:
-            raise_amount_options = [item for item in valid_actions if item['action'] == 'raise'][0]['amount']
-            if win_rate > 0.85:
-                # If it is extremely likely to win, then raise as much as possible
-                action = 'raise'
-                amount = raise_amount_options['max']
-            elif win_rate > 0.75:
-                # If it is likely to win, then raise by the minimum amount possible
-                action = 'raise'
-                amount = raise_amount_options['min']
-            else:
-                # If there is a chance to win, then call
-                action = 'call'
-        else:
-            action = 'call' if can_call and call_amount == 0 else 'fold'
-
-        # Set the amount
-        if amount is None:
-            items = [item for item in valid_actions if item['action'] == action]
-            amount = items[0]['amount']
-
-        return action, amount
-    '''
     
     def declare_action(self, valid_actions, hole_card, round_state):
         # a valid action is a dictionary (tuple?) of the form {'action': 'fold', 'amount': 2}
@@ -208,7 +166,7 @@ class PokerBot(BasePokerPlayer):
         # valid_actions format => [raise_action_info, call_action_info, fold_action_info]
         call_action_info = valid_actions['call']
         #action, amount = call_action_info["action"], call_action_info["amount"]
-        return self.minimax(self.opponent_state, 1, 2, -1, len(self.opponent_state), 100)  # action returned here is sent to the poker engine
+        return self.minimax(self.opponent_state, 1, len(self.opponent_state), 100)  # action returned here is sent to the poker engine
     
 
     def receive_game_start_message(self, game_info):

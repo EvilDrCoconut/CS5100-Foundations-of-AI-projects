@@ -1,9 +1,7 @@
-
-
 import random
 from pypokerengine.engine.poker_constants import PokerConstants
 import pypokerengine.engine.action_checker
-from pypokerengine.utils.card_utils import _pick_unused_card, _fill_community_card, gen_cards
+from pypokerengine.utils.card_utils import _pick_unused_card, _fill_community_card, gen_cards, evaluate_hand
 from pypokerengine.engine.hand_evaluator import HandEvaluator
 
 def Poker_Bot(self):
@@ -44,7 +42,7 @@ def Poker_Bot(self):
         raise_discount = .9; all_in_discount = .2
         next_action = 'call'; amount = None
 
-        flag = HandEvaluator.eval_hand(hole, community)
+        flag = evaluate_hand(hole, community)
 
         '''
         if HandEvaluator.__is_straightflash(cards): score = score * 25
@@ -56,7 +54,7 @@ def Poker_Bot(self):
         if HandEvaluator.__is_twopair(cards): score = score * 3
         if HandEvaluator.__is_onepair(cards): score = score * 2
         '''
-        print(flag)
+        print(flag['hand'])
 
         for opp in opponents_last_move:
             if opp == PokerConstants.Action.FOLD:
