@@ -38,18 +38,25 @@ def Poker_Bot(self):
 
     def bluff(score, hole, community):
 
+        #win_rate = estimate_win_rate()
+
         cards = hole + community
         raise_discount = .9; all_in_discount = .2
         next_action = 'call'; amount = None
 
-        if self.__is_straightflash(cards): score = score * 25
-        if self.__is_fourcard(cards): score = score * 20
-        if self.__is_fullhouse(cards): score = score * 14
-        if self.__is_flash(cards): score = score * 10
-        if self.__is_straight(cards): score = score * 8
-        if self.__is_threecard(cards): score = score * 5
-        if self.__is_twopair(cards): score = score * 3
-        if self.__is_onepair(cards): score = score * 2
+        flag = HandEvaluator.eval_hand(hole, community)
+
+        '''
+        if HandEvaluator.__is_straightflash(cards): score = score * 25
+        if HandEvaluator.__is_fourcard(cards): score = score * 20
+        if HandEvaluator.__is_fullhouse(cards): score = score * 14
+        if HandEvaluator.__is_flash(cards): score = score * 10
+        if HandEvaluator.__is_straight(cards): score = score * 8
+        if HandEvaluator.__is_threecard(cards): score = score * 5
+        if HandEvaluator.__is_twopair(cards): score = score * 3
+        if HandEvaluator.__is_onepair(cards): score = score * 2
+        '''
+        print(flag)
 
         for opp in opponents_last_move:
             if opp == PokerConstants.Action.FOLD:
@@ -76,5 +83,5 @@ def Poker_Bot(self):
             else:
                 next_action = 'fold'
                 amount = 0
-                
+
         return next_action, amount

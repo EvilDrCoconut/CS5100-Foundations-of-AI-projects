@@ -198,7 +198,7 @@ class PokerBot(BasePokerPlayer):
 
         return action, amount
     '''
-
+    
     def declare_action(self, valid_actions, hole_card, round_state):
         # a valid action is a dictionary (tuple?) of the form {'action': 'fold', 'amount': 2}
         # needs both action name (fold, call, raise) and an amount
@@ -209,6 +209,7 @@ class PokerBot(BasePokerPlayer):
         call_action_info = valid_actions['call']
         #action, amount = call_action_info["action"], call_action_info["amount"]
         return self.minimax(self.opponent_state, 1, 2, -1, len(self.opponent_state), 100)  # action returned here is sent to the poker engine
+    
 
     def receive_game_start_message(self, game_info):
         self.game_info = game_info['player_num']
