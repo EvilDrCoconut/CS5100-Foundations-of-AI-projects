@@ -26,7 +26,7 @@ def montecarlo_simulation(nb_player, hole_card, community_card):
     return 1 if my_score >= max(opponents_score) else 0
 
 
-class DataBloggerBot(BasePokerPlayer):
+class testBot(BasePokerPlayer):
     def __init__(self):
         super().__init__()
         self.wins = 0
@@ -89,4 +89,4 @@ class DataBloggerBot(BasePokerPlayer):
 
 
 def setup_ai():
-    return DataBloggerBot()
+    return testBot()

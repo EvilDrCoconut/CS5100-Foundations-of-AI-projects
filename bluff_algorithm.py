@@ -54,7 +54,6 @@ def Poker_Bot(self):
         if HandEvaluator.__is_twopair(cards): score = score * 3
         if HandEvaluator.__is_onepair(cards): score = score * 2
         '''
-        print(flag['hand'])
 
         for opp in opponents_last_move:
             if opp == PokerConstants.Action.FOLD:
