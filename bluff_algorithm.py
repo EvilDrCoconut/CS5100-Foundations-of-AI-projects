@@ -3,15 +3,37 @@
 import random
 from pypokerengine.engine.poker_constants import PokerConstants
 import pypokerengine.engine.action_checker
+from pypokerengine.utils.card_utils import _pick_unused_card, _fill_community_card, gen_cards
+from pypokerengine.engine.hand_evaluator import HandEvaluator
 
 def Poker_Bot(self):
     self.__initiate__()
 
-    algorithm = random.randint(1, 4)
-    current_algorithm = self.minimax()
-
     # needs to record opponents last movde
     opponents_last_move = []
+
+
+    def estimate_win_rate(nb_simulation, nb_player, hole_card, community_card=None):
+        if not community_card: community_card = []
+
+        # Make lists of Card objects out of the list of cards
+        community_card = gen_cards(community_card)
+        hole_card = gen_cards(hole_card)
+
+        # Estimate the win count by doing a Monte Carlo simulation
+        win_count = sum([montecarlo_simulation(nb_player, hole_card, community_card) for _ in range(nb_simulation)])
+        return 1.0 * win_count / nb_simulation
+
+    def montecarlo_simulation(nb_player, hole_card, community_card):
+        # Do a Monte Carlo simulation given the current state of the game by evaluating the hands
+        community_card = _fill_community_card(community_card, used_card=hole_card + community_card)
+        unused_cards = _pick_unused_card((nb_player - 1) * 2, hole_card + community_card)
+        opponents_hole = [unused_cards[2 * i:2 * i + 2] for i in range(nb_player - 1)]
+        opponents_score = [HandEvaluator.eval_hand(hole, community_card) for hole in opponents_hole]
+        my_score = HandEvaluator.eval_hand(hole_card, community_card)
+        return 1 if my_score >= max(opponents_score) else 0
+
+
 
 
     def bluff(score, hole, community):

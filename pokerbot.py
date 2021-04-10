@@ -1,5 +1,9 @@
 import random
 from pypokerengine.players import BasePokerPlayer
+from pypokerengine.engine.poker_constants import PokerConstants
+import pypokerengine.engine.action_checker
+from pypokerengine.utils.card_utils import _pick_unused_card, _fill_community_card, gen_cards
+from pypokerengine.engine.hand_evaluator import HandEvaluator
 
 class PokerBot(BasePokerPlayer):
     def __init__(self, startingAlg=-1):
@@ -39,7 +43,7 @@ class PokerBot(BasePokerPlayer):
         self.bluff(play_suggestion, util)
 
     def minimax(self, info_to_pass):
-        # Four algorithm implementations go here. 
+        # Four algorithm implementations go here.
         # Return expected value of return to pass to bluff
         play_suggestion = None
         return play_suggestion, util
@@ -52,9 +56,64 @@ class PokerBot(BasePokerPlayer):
     def alphaBeta(self, info_to_pass):
         play_suggestion = None
         return play_suggestion, util
-    
-    def bluff(self, play_suggestion, utilities):
-        return
+
+    def estimate_win_rate(self, nb_simulation, nb_player, hole_card, community_card=None):
+        if not community_card: community_card = []
+
+        # Make lists of Card objects out of the list of cards
+        community_card = gen_cards(community_card)
+        hole_card = gen_cards(hole_card)
+
+        # Estimate the win count by doing a Monte Carlo simulation
+        win_count = sum([self.montecarlo_sim(nb_player, hole_card, community_card) for _ in range(nb_simulation)])
+        return 1.0 * win_count / nb_simulation
+
+    # Do a Monte Carlo simulation given the current state of the game by evaluating the hands
+    def montecarlo_sim(self, nb_player, hole_card, community_card):
+        community_card = _fill_community_card(community_card, used_card=hole_card + community_card)
+        unused_cards = _pick_unused_card((nb_player - 1) * 2, hole_card + community_card)
+        opponents_hole = [unused_cards[2 * i:2 * i + 2] for i in range(nb_player - 1)]
+        opponents_score = [HandEvaluator.eval_hand(hole, community_card) for hole in opponents_hole]
+        my_score = HandEvaluator.eval_hand(hole_card, community_card)
+        return 1 if my_score >= max(opponents_score) else 0
+
+    #def bluff(self, play_suggestion, utilities):
+    def bluff(self, score, hole, community):
+
+        cards = hole + community
+        raise_discount = .9
+        all_in_discount = .2
+        next_action = PokerConstants.Action.CALL
+
+        if self.__is_straightflash(cards): score = score * 25
+        if self.__is_fourcard(cards): score = score * 20
+        if self.__is_fullhouse(cards): score = score * 14
+        if self.__is_flash(cards): score = score * 10
+        if self.__is_straight(cards): score = score * 8
+        if self.__is_threecard(cards): score = score * 5
+        if self.__is_twopair(cards): score = score * 3
+        if self.__is_onepair(cards): score = score * 2
+
+        for opp in self.opponent_state:
+            if opp == PokerConstants.Action.FOLD:
+                continue
+            elif opp == PokerConstants.Action.CALL:
+                continue
+            elif opp == PokerConstants.Action.RAISE:
+                score = score * raise_discount
+            elif opp == PokerConstants.Action.ANTE:
+                score = score * all_in_discount
+
+        if score > 250:
+            next_action = PokerConstants.Action.RAISE
+        elif 250 > score > 100:
+            next_action = PokerConstants.Action.CALL
+        else:
+            if len(community) > 4:
+                next_action = PokerConstants.Action.CALL
+            else:
+                next_action = PokerConstants.Action.FOLD
+        return next_action
 
     def declare_action(self, valid_actions, hole_card, round_state):
         # a valid action is a dictionary (tuple?) of the form {'action': 'fold', 'amount': 2}
