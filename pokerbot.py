@@ -15,14 +15,15 @@ import unittest
 
 class PokerBot(BasePokerPlayer):
     def __init__(self, startingAlg=-1):
+        super().__init__()
         # Initialize bot using a random implemented algorithm if user does not select one.
         self.algID = startingAlg
         if startingAlg == -1:
             self.algID = random.randint(0, 3)
 
-        self.valid_actions = {}
+        self.valid_actions = {'call' : 1, 'raise' : 2, 'fold' : 3}
         self.game_info = {}
-        self.hole_card = []
+        self.hole_card = ['C2', 'S2']
         self.round_state = {}
         self.round_count = 0
         self.opponent_state = {}
@@ -53,7 +54,7 @@ class PokerBot(BasePokerPlayer):
     '''
 
     #def minimax(self, info_to_pass):
-    def minimax(self, players, player_pos, depth, current_depth, depthNumber, sb_amount = 0):
+    def minimax(self, players, player_pos, depth, current_depth, numberOfPlayers, sb_amount = 0):
         # Four algorithm implementations go here.
         # Return expected value of return to pass to bluff
         #play_suggestion = None; util = 0
@@ -62,13 +63,13 @@ class PokerBot(BasePokerPlayer):
         current_depth += 1
         score = 0
 
-        if depth * depthNumber == current_depth:
+        if depth * numberOfPlayers == current_depth:
             return self.bluff(score, hole, community), score
         
-        if current_depth == depthNumber or current_depth == 0:
+        if current_depth == numberOfPlayers or current_depth == 0:
             score = float('-Inf')
             for action in action_utils.generate_legal_actions(players, player_pos, sb_amount):
-                result, max_move = self.minimax(players, table.Table.next_active_player_pos(self, player_pos), depth, current_depth, depthNumber)
+                result, max_move = self.minimax(players, table.Table.next_active_player_pos(self, player_pos), depth, current_depth, numberOfPlayers, sb_amount)
                 if result > score:
                     score = result
                     move = action
@@ -80,7 +81,7 @@ class PokerBot(BasePokerPlayer):
         else:
             score = float('Inf')
             for action in action_utils.generate_legal_actions(players, player_pos, sb_amount):
-                result, min_move = self.minimax(players, table.Table.next_ask_waiting_player_pos(self, player_pos), depth, current_depth, depthNumber)
+                result, min_move = self.minimax(players, table.Table.next_ask_waiting_player_pos(self, player_pos), depth, current_depth, numberOfPlayers, sb_amount)
                 if result < score:
                     score = result
                     move = action
@@ -160,11 +161,11 @@ class PokerBot(BasePokerPlayer):
         # needs both action name (fold, call, raise) and an amount
 
         # hole card is a length 2 list of the two cards (strings like 'DA', 'SK')
-
+        
         # valid_actions format => [raise_action_info, call_action_info, fold_action_info]
-        call_action_info = valid_actions[1]
-        action, amount = call_action_info["action"], call_action_info["amount"]
-        return action, amount   # action returned here is sent to the poker engine
+        call_action_info = valid_actions['call']
+        #action, amount = call_action_info["action"], call_action_info["amount"]
+        return self.minimax(self.opponent_state, 1, 2, -1, len(self.opponent_state), 100)  # action returned here is sent to the poker engine
 
     def receive_game_start_message(self, game_info):
         self.game_info = game_info
