@@ -34,51 +34,50 @@ def Poker_Bot(self):
 
 
 
-    def bluff(score, hole, community):
+    def bluff(score, hole, community, valid_actions):
 
-        #win_rate = estimate_win_rate()
-
+        win_rate = estimate_win_rate(100, self.num_players, hole, community)
         cards = hole + community
-        raise_discount = .9; all_in_discount = .2
+        #raise_discount = .9; all_in_discount = .2
         next_action = 'call'; amount = None
-
-        flag = evaluate_hand(hole, community)
 
         '''
         if HandEvaluator.__is_straightflash(cards): score = score * 25
-        if HandEvaluator.__is_fourcard(cards): score = score * 20
-        if HandEvaluator.__is_fullhouse(cards): score = score * 14
-        if HandEvaluator.__is_flash(cards): score = score * 10
-        if HandEvaluator.__is_straight(cards): score = score * 8
-        if HandEvaluator.__is_threecard(cards): score = score * 5
-        if HandEvaluator.__is_twopair(cards): score = score * 3
-        if HandEvaluator.__is_onepair(cards): score = score * 2
+        elif HandEvaluator.__is_fourcard(cards): score = score * 20
+        elif HandEvaluator.__is_fullhouse(cards): score = score * 14
+        elif HandEvaluator.__is_flash(cards): score = score * 10
+        elif HandEvaluator.__is_straight(cards): score = score * 8
+        elif HandEvaluator.__is_threecard(cards): score = score * 5
+        elif HandEvaluator.__is_twopair(cards): score = score * 3
+        elif HandEvaluator.__is_onepair(cards): score = score * 2
         '''
 
-        for opp in opponents_last_move:
-            if opp == PokerConstants.Action.FOLD:
-                continue
-            elif opp == PokerConstants.Action.CALL:
-                continue
-            elif opp == PokerConstants.Action.RAISE:
-                score = score * raise_discount
-            elif opp == PokerConstants.Action.ANTE:
-                score = score * all_in_discount
-
-        if score*raise_discount > 250:
-            if score > 500:
-                next_action = 'raise'
-                amount =  'max'
-            else:
-                next_action = 'raise'
-                amount = 'min'
-        elif 250 > score > 100:
-            next_action = 'call'
+        # Check whether it is possible to call
+        can_call = len([item for item in valid_actions if item['action'] == 'call']) > 0
+        if can_call:
+            # If so, compute the amount that needs to be called
+            call_amount = [item for item in valid_actions if item['action'] == 'call'][0]['amount']
         else:
-            if len(community) > 4:
+            call_amount = 0
+
+        if score * win_rate > 250:
+            raise_amount_options = [item for item in valid_actions if item['action'] == 'raise'][0]['amount']
+            if score > 450:
+                next_action = 'raise'
+                amount = raise_amount_options['max']
+            elif score > 350:
+                next_action = 'raise'
+                amount = raise_amount_options['min']
+            else:
+                next_action = 'call'
+        else:
+            if can_call and call_amount == 0:
                 next_action = 'call'
             else:
                 next_action = 'fold'
-                amount = 0
+
+        if amount is None:
+            items = [item for item in valid_actions if item['action'] == next_action]
+            amount = items[0]['amount']
 
         return next_action, amount
