@@ -1,6 +1,6 @@
 from pypokerengine.engine.hand_evaluator import HandEvaluator
 from pypokerengine.players import BasePokerPlayer
-from pypokerengine.utils.card_utils import _pick_unused_card, _fill_community_card, gen_cards
+from pypokerengine.utils.card_utils import _pick_unused_card, _fill_community_card, gen_cards, evaluate_hand
 
 
 # Estimate the ratio of winning games given the current state of the game
@@ -67,7 +67,13 @@ class testBot(BasePokerPlayer):
         if amount is None:
             items = [item for item in valid_actions if item['action'] == action]
             amount = items[0]['amount']
-
+        
+        #   These functions help to  check the return of functions of pypokerengine
+        #for card in hole_card: print(card.rank)
+        #print(hole_card, round_state['community_card'])
+        #if len(round_state['community_card']) == 5:
+        #    print(evaluate_hand(hole_card, round_state['community_card']))
+        
         return action, amount
 
     def receive_game_start_message(self, game_info):

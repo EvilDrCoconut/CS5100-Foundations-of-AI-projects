@@ -41,6 +41,9 @@ def Poker_Bot(self):
         #raise_discount = .9; all_in_discount = .2
         next_action = 'call'; amount = None
 
+        #hand_evaluation = evaluate_hand(hole, community)
+        #print(hand_evaluation)
+
         '''
         if HandEvaluator.__is_straightflash(cards): score = score * 25
         elif HandEvaluator.__is_fourcard(cards): score = score * 20

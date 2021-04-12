@@ -2,7 +2,7 @@
 #   for unit testing
 
 from pypokerengine.api.game import start_poker, setup_config
-
+from testBot import testBot
 from CallBot import CallBot
 from pokerbot import PokerBot
 import numpy as np
