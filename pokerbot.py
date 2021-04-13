@@ -99,9 +99,41 @@ class PokerBot(BasePokerPlayer):
     def mdp(self, info_to_pass):
         play_suggestion = None; util = 0
         return play_suggestion, util
-    def alphaBeta(self, info_to_pass):
-        play_suggestion = None; util = 0
-        return play_suggestion, util
+    def alpha_beta_pruning(self, players, player_pos, depth, current_depth, numberOfPlayers, sb_amount = 0, alpha = 99999, beta = -99999,index = 0):
+        community = self.round_state['community_card']
+        hole = self.hole_card
+        current_depth += 1
+        score = 0
+        if depth * numberOfPlayers == current_depth:
+            return self.bluff(score, hole, community), score
+
+        if current_depth == numberOfPlayers or current_depth == 0:
+            max_value = float('-Inf')
+            movement = ""
+            for action in self.valid_actions:
+                result, value = self.alpha_beta_pruning(players, self.tb.next_active_player_pos(player_pos), depth, current_depth, numberOfPlayers, sb_amount, alpha,beta,(index + 1) % numberOfPlayers)
+                if result > max_value:
+                    max_value = result
+                    movement = action
+                    if max_value > beta:
+                        return max_value, movement
+                    if max_value > alpha:
+                        alpha = max_value
+            return max_value, movement
+        else:
+            current_depth += 1
+
+            min_value = float('Inf')
+            for action in self.valid_actions:
+                result, value = self.alpha_beta_pruning(players, self.tb.next_active_player_pos(player_pos), depth, current_depth, numberOfPlayers, sb_amount, alpha,beta,(index + 1) % numberOfPlayers)
+                if result < min_value:
+                    min_value = result
+                    movement = action
+                    if min_value < alpha:
+                        return min_value, movement
+                    if min_value < beta:
+                        beta = min_value
+            return min_value, "Stop"
 
     def estimate_win_rate(self, nb_simulation, nb_player, hole_card, community_card=None):
         if not community_card: community_card = []
