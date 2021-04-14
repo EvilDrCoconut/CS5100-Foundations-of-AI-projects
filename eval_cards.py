@@ -35,14 +35,16 @@ def eval_cards(cards):
                 vset = 0
             if vset >= 5:
                 maxrank = vals[i]
-                print("Straight flush exists")
+                #print("Straight flush exists")
+                return 25
 
     # Find four card
     maxrank = ''
     for rank in ranks_by_card.keys():
         if len(ranks_by_card[rank]) == 4:
             maxrank = rank
-            print("Four of a kind exists")
+            #print("Four of a kind exists")
+            return 22
 
     # Find full house
     hasThree = False
@@ -56,7 +58,8 @@ def eval_cards(cards):
             hasPair = True
         
         if hasPair and hasThree:
-            print("Full house exists")
+            #print("Full house exists")
+            return 19
 
     vset = 0
     # Find straight
@@ -68,7 +71,8 @@ def eval_cards(cards):
         
         if vset >= 5:
             maxrank = vals[i]
-            print("Straight exists")
+            #print("Straight exists")
+            return 17
 
     # Find flush
     ranks = []
@@ -76,13 +80,14 @@ def eval_cards(cards):
         if len(suits_by_card[suit]) >= 5:
             for card in suits_by_card[suit]:
                 ranks.append(card[1:])
-
-            print("Flush exists")
+            #print("Flush exists")
+            return 15
 
     # Three of a kind
     for rank in ranks_by_card.keys():
         if len(ranks_by_card[rank]) == 3:
-            print("Three of a kind exists")
+            #print("Three of a kind exists")
+            return 12
 
     # Find pairs
     pairs = 0
@@ -90,14 +95,13 @@ def eval_cards(cards):
         if len(ranks_by_card[rank]) == 2:
             pairs += 1
         if pairs == 2:
-            print("Two pair exists")
+            #print("Two pair exists")
+            return 8
         elif pairs == 1:
-            print("One pair exists")
+            #print("One pair exists")
+            return 4
 
-    #return hand, value
-    
-
-eval_cards(['H2', 'D5', 'C4', 'D8', 'CK'])
+#eval_cards(['H2', 'D5', 'C2', 'D8', 'CK'])
 
 
 

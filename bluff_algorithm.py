@@ -1,8 +1,9 @@
 import random
 from pypokerengine.engine.poker_constants import PokerConstants
 import pypokerengine.engine.action_checker
-from pypokerengine.utils.card_utils import _pick_unused_card, _fill_community_card, gen_cards, evaluate_hand
+from pypokerengine.utils.card_utils import _pick_unused_card, _fill_community_card, gen_cards
 from pypokerengine.engine.hand_evaluator import HandEvaluator
+from eval_cards import eval_cards
 
 def Poker_Bot(self):
     self.__initiate__()
@@ -41,19 +42,9 @@ def Poker_Bot(self):
         #raise_discount = .9; all_in_discount = .2
         next_action = 'call'; amount = None
 
-        #hand_evaluation = evaluate_hand(hole, community)
-        #print(hand_evaluation)
+        multiplier = eval_cards(cards)
 
-        '''
-        if HandEvaluator.__is_straightflash(cards): score = score * 25
-        elif HandEvaluator.__is_fourcard(cards): score = score * 20
-        elif HandEvaluator.__is_fullhouse(cards): score = score * 14
-        elif HandEvaluator.__is_flash(cards): score = score * 10
-        elif HandEvaluator.__is_straight(cards): score = score * 8
-        elif HandEvaluator.__is_threecard(cards): score = score * 5
-        elif HandEvaluator.__is_twopair(cards): score = score * 3
-        elif HandEvaluator.__is_onepair(cards): score = score * 2
-        '''
+        score_helper = score*multiplier
 
         # Check whether it is possible to call
         can_call = len([item for item in valid_actions if item['action'] == 'call']) > 0
@@ -63,12 +54,12 @@ def Poker_Bot(self):
         else:
             call_amount = 0
 
-        if score * win_rate > 250:
+        if score_helper * win_rate > 250:
             raise_amount_options = [item for item in valid_actions if item['action'] == 'raise'][0]['amount']
-            if score > 450:
+            if score_helper > 450:
                 next_action = 'raise'
                 amount = raise_amount_options['max']
-            elif score > 350:
+            elif score_helper > 350:
                 next_action = 'raise'
                 amount = raise_amount_options['min']
             else:

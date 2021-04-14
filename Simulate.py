@@ -16,7 +16,7 @@ if __name__ == '__main__':
     for round in range(100):
         p1 = testBot; p2 = CallBot() #; p3 = pokerBot
 
-        config = setup_config(max_round=5, initial_stack=100, small_blind_amount=5)
+        config = setup_config(max_round=5, initial_stack=1000, small_blind_amount=5)
         config.register_player(name="p1", algorithm=p1)
         config.register_player(name="p2", algorithm=p2)
         game_result = start_poker(config, verbose=0)

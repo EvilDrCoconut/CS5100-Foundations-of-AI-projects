@@ -70,7 +70,7 @@ class testBot(BasePokerPlayer):
         
         #   These functions help to  check the return of functions of pypokerengine
         #for card in hole_card: print(card.rank)
-        #print(hole_card, round_state['community_card'])
+        print(hole_card, round_state['community_card'])
         #if len(round_state['community_card']) == 5:
         #    print(evaluate_hand(hole_card, round_state['community_card']))
         

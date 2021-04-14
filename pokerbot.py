@@ -79,8 +79,7 @@ class PokerBot(BasePokerPlayer):
                     move = action
                     self.score = score
 
-            move = self.bluff(score, hole, community)
-            return move, score
+            return self.bluff(score, hole, community)
 
         else:
             score = float('Inf')
@@ -89,9 +88,7 @@ class PokerBot(BasePokerPlayer):
                 if result < score:
                     score = result
                     move = action
-            move = self.bluff(score, hole, community)
-            return move, score
-            #return play_suggestion, util
+            return self.bluff(score, hole, community)
     
     def expectimax(self, info_to_pass):
         play_suggestion = None; util = 0
