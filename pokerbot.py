@@ -161,15 +161,7 @@ class PokerBot(BasePokerPlayer):
 
         flag = evaluate_hand(hole, self.community_card)
         print(flag['hand'])
-        '''
-        if HandEvaluator.__is_straightflash(cards): score = score * 25
-        if HandEvaluator.__is_fourcard(cards): score = score * 20
-        if HandEvaluator.__is_fullhouse(cards): score = score * 14
-        if HandEvaluator.__is_flash(cards): score = score * 10
-        if HandEvaluator.__is_straight(cards): score = score * 8
-        if HandEvaluator.__is_threecard(cards): score = score * 5
-        if HandEvaluator.__is_twopair(cards): score = score * 3
-        if HandEvaluator.__is_onepair(cards): score = score * 2
+        
         '''
         print(flag)
 
