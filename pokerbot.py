@@ -66,49 +66,40 @@ class PokerBot(BasePokerPlayer):
         #self.bluff(play_suggestion, util)
     '''
 
-    def evaluation(self, player):
+    def evaluation(self, player, table):
         total = 0
         paid_sum = player.paid_sum()
         initial_stack = player.stack
         current_money = initial_stack - paid_sum
 
-        for i in self.tb.seats.players:
+        for i in table.seats.players:
             current = i.stack-i.paid_sum()
             total+=current
-        opponent_money = total/len(self.tb.seats.players)
-        print(self.pot['amount'])
-
-        ''''
-        money_state
-        opponents_money
-        scared = 0
-        if initial_stack-paid_sum-money_state<0:
-            return -999
-        if opponents_money>current_money:
-            scared = current_money-opponents_money
-        else:
-            scared = current_money-opponents_money
-        getMainPot, getPayInfo
-        '''
-        sum = current_money-0.8*opponent_money+self.pot['amount']
+        opponent_money = total/len(table.seats.players)
+        sum = current_money-0.6*opponent_money+self.pot['amount']
         return sum
 
     # def minimax(self, info_to_pass):
-    def minimax(self, player, player_pos, depth, current_depth, numberOfPlayers, valid_actions, sb_amount=0 ):
+    def minimax(self, players, player_pos, depth, current_depth, numberOfPlayers, valid_actions, sb_amount, table):
+        '''
+        players:
+        player_pos:The position of player
+        depth: set it to 2
+        '''
         community = self.round_state['community_card']
         hole = self.hole_card
         current_depth += 1
         score = 0
         if depth * numberOfPlayers == current_depth:
             # return self.bluff(score, hole, community), score
-            score = self.evaluation(self.tb.seats.players[player_pos])
+            score = self.evaluation(table.seats.players[player_pos])
             print(score)
             return self.bluff(score, hole, community, valid_actions)
         if current_depth % numberOfPlayers == 0:
             score = float('-Inf')
             for action in valid_actions:
-                max_move, result = self.minimax(player, self.tb.next_active_player_pos(player_pos), depth,
-                                                current_depth, numberOfPlayers, valid_actions, sb_amount)
+                max_move, result = self.minimax(players, table.next_active_player_pos(player_pos), depth,
+                                                current_depth, numberOfPlayers, valid_actions, sb_amount, table)
                 if result > score:
                     score = result
                     move = action
@@ -119,8 +110,8 @@ class PokerBot(BasePokerPlayer):
         else:
             score = float('Inf')
             for action in valid_actions:
-                min_move, result = self.minimax(player, self.tb.next_active_player_pos(player_pos), depth,
-                                                current_depth, numberOfPlayers, valid_actions, sb_amount)
+                min_move, result = self.minimax(players, table.next_active_player_pos(player_pos), depth,
+                                                current_depth, numberOfPlayers, valid_actions, sb_amount,table)
                 if result < score:
                     score = result
                     move = action
@@ -133,41 +124,42 @@ class PokerBot(BasePokerPlayer):
     def mdp(self, info_to_pass):
         play_suggestion = None; util = 0
         return play_suggestion, util
-    def alpha_beta_pruning(self, players, player_pos, depth, current_depth, numberOfPlayers, sb_amount = 0, alpha = 99999, beta = -99999,index = 0):
+    def alpha_beta_pruning(self, players, player_pos, depth, current_depth, numberOfPlayers, valid_actions, table, sb_amount = 0, alpha = 99999, beta = -99999):
         community = self.round_state['community_card']
         hole = self.hole_card
         current_depth += 1
-        score = 0
         if depth * numberOfPlayers == current_depth:
-            return self.bluff(score, hole, community), score
 
-        if current_depth == numberOfPlayers or current_depth == 0:
+            score = self.evaluation(table.seats.players[player_pos])
+            print(score)
+            return self.bluff(score, hole, community, valid_actions)
+
+        if current_depth % numberOfPlayers == 0:
             max_value = float('-Inf')
             movement = ""
-            for action in self.valid_actions:
-                result, value = self.alpha_beta_pruning(players, self.tb.next_active_player_pos(player_pos), depth, current_depth, numberOfPlayers, sb_amount, alpha,beta,(index + 1) % numberOfPlayers)
-                if result > max_value:
-                    max_value = result
+            for action in valid_actions:
+                move,score = self.alpha_beta_pruning(players, table.next_active_player_pos(player_pos), depth, current_depth, numberOfPlayers,valid_actions, sb_amount, alpha,beta)
+                if score > max_value:
+                    max_value = score
                     movement = action
                     if max_value > beta:
-                        return max_value, movement
+                        return movement, max_value
                     if max_value > alpha:
                         alpha = max_value
-            return max_value, movement
+            return movement, max_value
         else:
-            current_depth += 1
 
             min_value = float('Inf')
-            for action in self.valid_actions:
-                result, value = self.alpha_beta_pruning(players, self.tb.next_active_player_pos(player_pos), depth, current_depth, numberOfPlayers, sb_amount, alpha,beta,(index + 1) % numberOfPlayers)
-                if result < min_value:
-                    min_value = result
+            for action in valid_actions:
+                move,score = self.alpha_beta_pruning(players, table.next_active_player_pos(player_pos), depth, current_depth, numberOfPlayers, valid_actions,sb_amount, alpha,beta)
+                if score < min_value:
+                    min_value = score
                     movement = action
                     if min_value < alpha:
-                        return min_value, movement
+                        return movement, min_value
                     if min_value < beta:
                         beta = min_value
-            return min_value, "Stop"
+            return movement, min_value
 
     def estimate_win_rate(self,nb_simulation, nb_player, hole_card, community_card=None):
         if not community_card: community_card = []
@@ -245,7 +237,8 @@ class PokerBot(BasePokerPlayer):
         # valid_actions format => [raise_action_info, call_action_info, fold_action_info]
         call_action_info = valid_actions[1]
         #action, amount = call_action_info["action"], call_action_info["amount"]
-        return self.minimax(self.opponent_state, 0, 2, -1, len(self.opponent_state),valid_actions, 100)  # action returned here is sent to the poker engine
+        return self.alpha_beta_pruning(self.opponent_state, 0, 2, -1, len(self.opponent_state), valid_actions,100, table)
+        #return self.minimax(self.opponent_state, 0, 2, -1, len(self.opponent_state),valid_actions, 100, table)  # action returned here is sent to the poker engine
 
     def receive_game_start_message(self, game_info):
         self.game_info = game_info
@@ -273,6 +266,4 @@ class PokerBot(BasePokerPlayer):
         is_winner = self.uuid in [item['uuid'] for item in winners]
         self.wins += int(is_winner)
         self.losses += int(not is_winner)
-        
-
         
