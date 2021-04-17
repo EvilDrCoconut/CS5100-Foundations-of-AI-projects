@@ -191,25 +191,25 @@ class PokerBot(BasePokerPlayer):
 
 
 
-        flag = evaluate_hand(hole, self.community_card)
-        print(flag['hand'])
 
-        print(flag)
+    def bluff(self,score, hole, community, valid_actions):
 
-        for opp in self.opponent_state:
-            if opp == PokerConstants.Action.FOLD:
-                continue
-            elif opp == PokerConstants.Action.CALL:
-                continue
-            elif opp == PokerConstants.Action.RAISE:
-                score = score * raise_discount
-            elif opp == PokerConstants.Action.ANTE:
-                score = score * all_in_discount
+        win_rate = self.estimate_win_rate(100, 3, hole, community)
+        cards = hole + community
+        #raise_discount = .9; all_in_discount = .2
+        next_action = 'call'; amount = None
 
-        if score*raise_discount > 250:
-            next_action = PokerConstants.Action.RAISE
-        elif 250 > score > 100:
-            next_action = PokerConstants.Action.CALL
+        multiplier = eval_cards.eval_cards(cards)
+        if multiplier==None:
+            multiplier = 1
+        print(multiplier)
+        score_helper = score*multiplier
+
+        # Check whether it is possible to call
+        can_call = len([item for item in valid_actions if item['action'] == 'call']) > 0
+        if can_call:
+            # If so, compute the amount that needs to be called
+            call_amount = [item for item in valid_actions if item['action'] == 'call'][0]['amount']
         else:
             call_amount = 0
 
