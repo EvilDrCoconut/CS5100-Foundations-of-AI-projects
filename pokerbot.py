@@ -222,7 +222,7 @@ class PokerBot(BasePokerPlayer):
         return next_action, amount
 
     
-    def declare_action(self, valid_actions, hole_card, round_state)
+    def declare_action(self, valid_actions, hole_card, round_state):
 
         # valid_actions format => [raise_action_info, call_action_info, fold_action_info]
         call_action_info = valid_actions[1]
@@ -234,11 +234,11 @@ class PokerBot(BasePokerPlayer):
 
         #return a pair: action, amount = call_action_info["action"], call_action_info["amount"]
 
-        if self.algID = 1:
+        if self.algID == 1:
             return self.minimax(0, -1, valid_actions, round_state, 100)  # action returned here is sent to the poker engine
-        elif self.algID = 2:
+        elif self.algID == 2:
             return self.alpha_beta_pruning(0, -1, valid_actions, round_state, 100)
-        elif self.algID = 3:
+        elif self.algID == 3:
             return self.expectimax(round_state)
         else:
             return 'fold', 0
@@ -247,12 +247,15 @@ class PokerBot(BasePokerPlayer):
         self.game_info = game_info
 
     def receive_round_start_message(self, round_count, hole_card, opponent_state):
+        pass
 
     def receive_street_start_message(self, street, round_state):
         #self.round_state = round_state
+        pass
 
     def receive_game_update_message(self, new_action, round_state):
         #self.round_state = round_state
+        pass
 
     def receive_round_result_message(self, winners, hand_info, round_state):
         #self.round_state = round_state
