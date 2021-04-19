@@ -144,14 +144,10 @@ class PokerBot(BasePokerPlayer):
         my_score = HandEvaluator.eval_hand(hole_card, community_card)
         return 1 if my_score >= max(opponents_score) else 0
 
-
-
-
     def bluff(self,score, hole, community, valid_actions):
 
         win_rate = self.estimate_win_rate(100, 3, hole, community)
         cards = hole + community
-        #raise_discount = .9; all_in_discount = .2
         next_action = 'call'; amount = None
 
         multiplier = eval_cards.eval_cards(cards)
