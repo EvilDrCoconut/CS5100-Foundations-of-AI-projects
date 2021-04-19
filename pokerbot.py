@@ -121,9 +121,11 @@ class PokerBot(BasePokerPlayer):
     def expectimax(self, info_to_pass):
         play_suggestion = None; util = 0
         return play_suggestion, util
+    '''
     def mdp(self, info_to_pass):
         play_suggestion = None; util = 0
         return play_suggestion, util
+    '''
     def alpha_beta_pruning(self, players, player_pos, depth, current_depth, numberOfPlayers, valid_actions, table, sb_amount = 0, alpha = 99999, beta = -99999):
         community = self.round_state['community_card']
         hole = self.hole_card
