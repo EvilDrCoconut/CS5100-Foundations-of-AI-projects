@@ -17,14 +17,12 @@ from pypokerengine.utils import card_utils
 import unittest
 
 class PokerBot(BasePokerPlayer):
-    def __init__(self, startingAlg=-1):
+    def __init__(self, startingAlg= 1):
         super().__init__()
         # Initialize bot using a random implemented algorithm if user does not select one.
         self.algID = startingAlg
-        if startingAlg == -1:
-            self.algID = random.randint(0, 3)
-
-        #self.valid_actions = {'call':1, 'raise':2, 'fold':3}
+        self.game_info = None
+        self.hole_card = None
         self.score = 0
         self.wins = 0
         self.losses = 0
@@ -74,7 +72,6 @@ class PokerBot(BasePokerPlayer):
         sum = current_money-0.6*opponent_money+pot
         return sum
 
-    # def minimax(self, info_to_pass):
     def minimax(self, player_pos, current_depth, valid_actions, round_state, sb_amount):
         '''
         players:
@@ -89,10 +86,10 @@ class PokerBot(BasePokerPlayer):
         depth = len(table.seats.players) - 1
 
         if depth * len(table.seats.players) == current_depth:
-            # return self.bluff(score, hole, community), score
-            score = self.evaluation(table.seats.players[player_pos], table, round_state['main pot'])
+            score = self.evaluation(table.seats.players[player_pos], table, round_state['pot']['main'])
             print(score)
             return self.bluff(score, hole, community, valid_actions)
+
         if current_depth % len(table.seats.players) == 0:
             score = float('-Inf')
             for action in valid_actions:
@@ -102,7 +99,6 @@ class PokerBot(BasePokerPlayer):
                     score = result
                     move = action
 
-            # move = self.bluff(score, hole, community)
             return move, score
 
         else:
@@ -113,17 +109,12 @@ class PokerBot(BasePokerPlayer):
                 if result < score:
                     score = result
                     move = action
-            # move = self.bluff(score, hole, community)
             return move, score
     
     def expectimax(self, info_to_pass):
         play_suggestion = None; util = 0
         return play_suggestion, util
-    '''
-    def mdp(self, info_to_pass):
-        play_suggestion = None; util = 0
-        return play_suggestion, util
-    '''
+        
     def alpha_beta_pruning(self, player_pos, current_depth, valid_actions, round_state, sb_amount = 0, alpha = 99999, beta = -99999):
         table = round_state['table']
         community = round_state['community_card']
@@ -133,7 +124,7 @@ class PokerBot(BasePokerPlayer):
 
         if depth * len(table.seats.players) == current_depth:
 
-            score = self.evaluation(table.seats.players[player_pos], table, round_state['round_state'])
+            score = self.evaluation(table.seats.players[player_pos], table, round_state['pot']['main'])
             print(score)
             return self.bluff(score, hole, community, valid_actions)
 
@@ -231,42 +222,40 @@ class PokerBot(BasePokerPlayer):
         return next_action, amount
 
     
-    def declare_action(self, valid_actions, hole_card, round_state):
-        # a valid action is a dictionary (tuple?) of the form {'action': 'fold', 'amount': 2}
-        # needs both action name (fold, call, raise) and an amount
+    def declare_action(self, valid_actions, hole_card, round_state)
 
-        # hole card is a length 2 list of the two cards (strings like 'DA', 'SK')
-        
         # valid_actions format => [raise_action_info, call_action_info, fold_action_info]
         call_action_info = valid_actions[1]
-        print(round_state)
-        #action, amount = call_action_info["action"], call_action_info["amount"]
-        return self.alpha_beta_pruning(0, 2, -1, valid_actions, round_state, 100)
-        #return self.minimax(0, -1,valid_actions, 100, round_state['table'])  # action returned here is sent to the poker engine
+        self.hole_card = hole_card
+
+        # checking what round_state consists of
+        for key in round_state.keys():
+            print(key, round_state[key])
+
+        #return a pair: action, amount = call_action_info["action"], call_action_info["amount"]
+
+        if self.algID = 1:
+            return self.minimax(0, -1, valid_actions, round_state, 100)  # action returned here is sent to the poker engine
+        elif self.algID = 2:
+            return self.alpha_beta_pruning(0, -1, valid_actions, round_state, 100)
+        elif self.algID = 3:
+            return self.expectimax(round_state)
+        else:
+            return 'fold', 0
 
     def receive_game_start_message(self, game_info):
         self.game_info = game_info
-        # choose an algorithm??
 
     def receive_round_start_message(self, round_count, hole_card, opponent_state):
-        # changed name of seats to opponent state. May need to change back if this causes an issue
-        self.round_count = round_count
-        self.hole_card = hole_card
-        self.opponent_state = opponent_state
 
     def receive_street_start_message(self, street, round_state):
-        self.street = street
-        self.round_state = round_state
+        #self.round_state = round_state
 
     def receive_game_update_message(self, new_action, round_state):
-        self.new_action = new_action
-        self.round_state = round_state
+        #self.round_state = round_state
 
     def receive_round_result_message(self, winners, hand_info, round_state):
-        self.winners = winners
-        self.opponent_hand = hand_info
-        self.round_state = round_state
-
+        #self.round_state = round_state
         is_winner = self.uuid in [item['uuid'] for item in winners]
         self.wins += int(is_winner)
         self.losses += int(not is_winner)
