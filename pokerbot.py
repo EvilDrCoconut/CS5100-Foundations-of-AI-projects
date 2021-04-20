@@ -17,7 +17,7 @@ from pypokerengine.utils import card_utils
 import unittest
 
 class PokerBot(BasePokerPlayer):
-    def __init__(self, startingAlg= 1):
+    def __init__(self, startingAlg= 2):
         super().__init__()
         # Initialize bot using a random implemented algorithm if user does not select one.
         self.algID = startingAlg
@@ -31,17 +31,16 @@ class PokerBot(BasePokerPlayer):
         # A debug function allowing someone to set the bot's algorithm at any time.
         self.algID = algID
 
-    def evaluation(self, player, table, pot):
-        total = 0
-        paid_sum = player.paid_sum()
-        initial_stack = player.stack
-        current_money = initial_stack - paid_sum
+    def evaluation(self, player_pos, round_state):
+        total_opp = 0
 
-        for i in table.seats.players:
-            current = i.stack-i.paid_sum()
-            total+=current
-        opponent_money = total/len(table.seats.players)
-        sum = current_money-0.6*opponent_money+pot
+        current_money = round_state['seats'][player_pos]['stack']
+
+        for i in round_state['seats']:
+            if i['uuid']!=round_state['seats'][player_pos]['uuid']:
+                total_opp+=i['stack']
+        opponent_money = total_opp/(len(round_state['seats'])-1)
+        sum = current_money-0.3*opponent_money+round_state['pot']['main']['amount']
         return sum
 
     def minimax(self, player_pos, current_depth, valid_actions, round_state):
@@ -56,29 +55,37 @@ class PokerBot(BasePokerPlayer):
         score = 0
         numOfPlayers = len(round_state['seats'])
         depth = numOfPlayers - 1
+        for index in range(player_pos, numOfPlayers - 1):
+            if index + 1 <= numOfPlayers and round_state['seats'][index + 1].is_active():
+                player_pos = index + 1
+                break
+            elif index + 1 >= numOfPlayers:
+                player_pos = 0
+                break
 
         if depth * numOfPlayers == current_depth:
-            score = self.evaluation(table.seats.players[player_pos], round_state['seats'], round_state['pot']['main'])
-            print(score)
-            return self.bluff(score, hole, community, valid_actions)
+            score = self.evaluation(player_pos, round_state)
+            action, amount = self.bluff(score, hole, community, valid_actions)
+
+            return action, amount
 
         if current_depth % numOfPlayers == 0:
             score = float('-Inf')
             for action in valid_actions:
-                max_move, result = self.minimax(table.next_active_player_pos(player_pos), current_depth, valid_actions, round_state)
+                max_move, result = self.minimax(player_pos, current_depth, valid_actions, round_state)
                 if result > score:
                     score = result
-                    move = action
+                    move = action['action']
 
             return move, score
 
         else:
             score = float('Inf')
             for action in valid_actions:
-                min_move, result = self.minimax(table.next_active_player_pos(player_pos), current_depth, valid_actions, round_state)
+                min_move, result = self.minimax(player_pos, current_depth, valid_actions, round_state)
                 if result < score:
                     score = result
-                    move = action
+                    move = action['action']
             return move, score
     
     def expectimax(self, info_to_pass):
@@ -91,19 +98,19 @@ class PokerBot(BasePokerPlayer):
         current_depth += 1
         numOfPlayers = len(round_state['seats'])
         depth = numOfPlayers - 1
-
+        for index in range(player_pos, numOfPlayers - 1):
+            if index + 1 <= numOfPlayers and round_state['seats'][index + 1].is_active():
+                player_pos = index + 1
+                break
+            elif index + 1 >= numOfPlayers:
+                player_pos = 0
+                break
         if depth * numOfPlayers == current_depth:
             score = self.evaluation(round_state['seats'][player_pos], round_state['seats'], round_state['pot']['main'])
             print(score)
             return self.bluff(score, hole, community, valid_actions)
 
-        for index in range(player_pos, numOfPlayers-1):
-            if index+1<=numOfPlayers and round_state['seats'][index+1].is_active():
-                player_pos = index+1
-                break
-            elif index+1>=numOfPlayers:
-                player_pos = 0
-                break
+
 
 
         if current_depth % len(round_state['seats']) == 0:
@@ -113,7 +120,7 @@ class PokerBot(BasePokerPlayer):
                 move,score = self.alpha_beta_pruning(player_pos, current_depth, valid_actions, alpha,beta)
                 if score > max_value:
                     max_value = score
-                    movement = action
+                    movement = action['action']
                     if max_value > beta:
                         return movement, max_value
                     if max_value > alpha:
@@ -126,7 +133,7 @@ class PokerBot(BasePokerPlayer):
                 move,score = self.alpha_beta_pruning(player_pos, depth, current_depth, valid_actions, alpha,beta)
                 if score < min_value:
                     min_value = score
-                    movement = action
+                    movement = action['action']
                     if min_value < alpha:
                         return movement, min_value
                     if min_value < beta:
@@ -140,8 +147,9 @@ class PokerBot(BasePokerPlayer):
         community_card = gen_cards(community_card)
         hole_card = gen_cards(hole_card)
 
+
         # Estimate the win count by doing a Monte Carlo simulation
-        win_count = sum([card_utils._montecarlo_simulation(nb_player, hole_card, community_card) for _ in range(nb_simulation)])
+        win_count = sum([self.montecarlo_simulation(nb_player, hole_card, community_card) for _ in range(nb_simulation)])
         return 1.0 * win_count / nb_simulation
 
     def montecarlo_simulation(self, nb_player, hole_card, community_card):
@@ -154,7 +162,6 @@ class PokerBot(BasePokerPlayer):
         return 1 if my_score >= max(opponents_score) else 0
 
     def bluff(self,score, hole, community, valid_actions):
-
         win_rate = self.estimate_win_rate(100, 3, hole, community)
         cards = hole + community
         next_action = 'call'; amount = None
@@ -162,9 +169,9 @@ class PokerBot(BasePokerPlayer):
         multiplier = eval_cards.eval_cards(cards)
         if multiplier==None:
             multiplier = 1
-        print(multiplier)
-        score_helper = score*multiplier
 
+        score_helper = score*multiplier
+        print(win_rate)
         # Check whether it is possible to call
         can_call = len([item for item in valid_actions if item['action'] == 'call']) > 0
         if can_call:
@@ -172,10 +179,10 @@ class PokerBot(BasePokerPlayer):
             call_amount = [item for item in valid_actions if item['action'] == 'call'][0]['amount']
         else:
             call_amount = 0
-
-        if score_helper * win_rate > 250:
+        print(call_amount)
+        if score_helper * win_rate > 200:
             raise_amount_options = [item for item in valid_actions if item['action'] == 'raise'][0]['amount']
-            if score_helper > 450:
+            if score_helper > 250:
                 next_action = 'raise'
                 amount = raise_amount_options['max']
             elif score_helper > 350:
@@ -192,7 +199,7 @@ class PokerBot(BasePokerPlayer):
         if amount is None:
             items = [item for item in valid_actions if item['action'] == next_action]
             amount = items[0]['amount']
-
+        print(next_action, amount)
         return next_action, amount
 
     def declare_action(self, valid_actions, hole_card, round_state):
@@ -208,18 +215,19 @@ class PokerBot(BasePokerPlayer):
             index+=1
 
         # checking what round_state consists of
-        for key in round_state.keys():
-            print(key, round_state[key])
 
         #return a pair: action, amount = call_action_info["action"], call_action_info["amount"]
 
         if self.algID == 1:
-            return self.minimax(player_pos, -1, valid_actions, round_state)  # action returned here is sent to the poker engine
+            action, amount = self.minimax(player_pos, -1, valid_actions, round_state)
+            print(action)
+            return action, amount # action returned here is sent to the poker engine
         elif self.algID == 2:
             return self.alpha_beta_pruning(player_pos, -1, valid_actions, round_state)
         elif self.algID == 3:
             return self.expectimax(round_state)
         else:
+            print('error check')
             return 'fold', 0
 
     def receive_game_start_message(self, game_info):
