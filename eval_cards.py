@@ -22,7 +22,6 @@ def eval_cards(cards):
 
     straight = []
     vset = 0
-    maxrank = ''
     # Find straight flush
     for i in range(2, 14):
         for suit in suits_by_card.keys():
@@ -31,24 +30,19 @@ def eval_cards(cards):
             else:
                 vset = 0
             if vset >= 5:
-                maxrank = vals[i]
                 return 25
 
     # Find four card
-    maxrank = ''
     for rank in ranks_by_card.keys():
         if len(ranks_by_card[rank]) == 4:
-            maxrank = rank
             return 22
 
     # Find full house
     hasThree = False
-    hasPair = False
-    maxrank = ''
+    hasPair = False'
     for rank in ranks_by_card.keys():
         if len(ranks_by_card[rank]) == 3:
             hasThree = True
-            maxrank = rank
         elif len(ranks_by_card[rank]) == 2:
             hasPair = True
         
@@ -64,7 +58,6 @@ def eval_cards(cards):
             vset = 0
         
         if vset >= 5:
-            maxrank = vals[i]
             return 17
 
     # Find flush
