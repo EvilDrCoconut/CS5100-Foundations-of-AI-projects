@@ -92,7 +92,7 @@ class PokerBot(BasePokerPlayer):
         play_suggestion = None; util = 0
         return play_suggestion, util
         
-    def alpha_beta_pruning(self, player_pos, current_depth, valid_actions, round_state, alpha = 99999, beta = -99999):
+    def alpha_beta_pruning(self, player_pos, current_depth, valid_actions, round_state, alpha, beta):
         community = round_state['community_card']
         hole = self.hole_card
         current_depth += 1
@@ -106,18 +106,15 @@ class PokerBot(BasePokerPlayer):
                 player_pos = 0
                 break
         if depth * numOfPlayers == current_depth:
-            score = self.evaluation(round_state['seats'][player_pos], round_state['seats'], round_state['pot']['main'])
-            print(score)
-            return self.bluff(score, hole, community, valid_actions)
-
-
-
+            score = self.evaluation(player_pos, round_state)
+            action, amount = self.bluff(score, hole, community, valid_actions)
+            return action, amount
 
         if current_depth % len(round_state['seats']) == 0:
             max_value = float('-Inf')
             movement = ""
             for action in valid_actions:
-                move,score = self.alpha_beta_pruning(player_pos, current_depth, valid_actions, alpha,beta)
+                move,score = self.alpha_beta_pruning(player_pos, current_depth, valid_actions, round_state, alpha,beta)
                 if score > max_value:
                     max_value = score
                     movement = action['action']
@@ -130,7 +127,7 @@ class PokerBot(BasePokerPlayer):
 
             min_value = float('Inf')
             for action in valid_actions:
-                move,score = self.alpha_beta_pruning(player_pos, depth, current_depth, valid_actions, alpha,beta)
+                move,score = self.alpha_beta_pruning(player_pos, current_depth, valid_actions,round_state, alpha,beta)
                 if score < min_value:
                     min_value = score
                     movement = action['action']
@@ -220,10 +217,9 @@ class PokerBot(BasePokerPlayer):
 
         if self.algID == 1:
             action, amount = self.minimax(player_pos, -1, valid_actions, round_state)
-            print(action)
             return action, amount # action returned here is sent to the poker engine
         elif self.algID == 2:
-            return self.alpha_beta_pruning(player_pos, -1, valid_actions, round_state)
+            return self.alpha_beta_pruning(player_pos, -1, valid_actions, round_state, 99999, -99999)
         elif self.algID == 3:
             return self.expectimax(round_state)
         else:
