@@ -8,9 +8,8 @@ from pokerbot import PokerBot
 import numpy as np
 
 if __name__ == '__main__':
-    pokerBot = PokerBot()
+    pokerBot = PokerBot(2)
     testBot = testBot()
-    print(type(pokerBot))
 
     # The stack log contains the stacks of the Data Blogger bot after each game (the initial stack is 100)
     stack_log = []

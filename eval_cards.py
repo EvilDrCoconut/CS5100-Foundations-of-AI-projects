@@ -1,3 +1,4 @@
+# function to evaluate strength of hand, by robbie
 def eval_cards(cards):
 
     suits_by_card = {}
@@ -39,7 +40,7 @@ def eval_cards(cards):
 
     # Find full house
     hasThree = False
-    hasPair = False'
+    hasPair = False
     for rank in ranks_by_card.keys():
         if len(ranks_by_card[rank]) == 3:
             hasThree = True
@@ -84,12 +85,21 @@ def eval_cards(cards):
             return 4
 
 
+# method to score own hand if no other algorithm was used as heurisitc
+def selfScorer(hole_card):
+    score = 0
 
+    point_vals = {'2' : 10, '3': 20, '4' : 30, '5' : 40, '6' : 50, '7' : 60, '8' : 70, 
+                    '9' : 80, 'T' : 90, 'J' : 100, 'Q' : 110, 'K' : 120, 'A' : 130}
 
+    for card in hole_card:
+        suit = card[0]
+        rank = card[1]
+        try:
+            score += point_vals[rank]
+        except:
+            print('Key Error', card)
 
-    
+    #print(score, hole_card)
 
-
-    
-
-
+    return score
