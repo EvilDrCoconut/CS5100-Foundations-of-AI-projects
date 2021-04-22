@@ -17,9 +17,12 @@ from pypokerengine.utils import card_utils
 import unittest
 
 class PokerBot(BasePokerPlayer):
-    def __init__(self, startingAlg= 2):
+
+    # Note for users, to change algorithms when init a bot:
+    #   0 = fishPlayerAlgo, 1 = minimax, 2 = alpha-beta, 3 = expectimax, 4 = bluff algorithm
+    def __init__(self, startingAlg = 0):
         super().__init__()
-        # Initialize bot using a random implemented algorithm if user does not select one.
+        # Initialize bot using a standard fish player algorithm unless told not to.
         self.algID = startingAlg
         self.game_info = None
         self.hole_card = None
@@ -27,9 +30,63 @@ class PokerBot(BasePokerPlayer):
         self.wins = 0
         self.losses = 0
 
+        self.whatAlgo()
+
     def set_algorithm(self, algID):
         # A debug function allowing someone to set the bot's algorithm at any time.
         self.algID = algID
+        self.whatAlgo()
+
+
+    def whatAlgo(self):
+        if self.algID == 0:
+            print('Fish Player Algorithm')
+        elif self.algID == 1:
+            print('Minimax Algorithm')
+        elif self.algID == 2:
+            print('Alpha-Beta Algorithm')
+        elif self.algID == 3:
+            print('Expectimax Algorithm')
+        else:
+            print('BLuff Algorithm')
+
+    def fishPlayerAlgorithm(valid_actions, hole_card, round_state):
+                # Estimate the win rate
+        win_rate = estimate_win_rate(100, self.num_players, hole_card, round_state['community_card'])
+
+        # Check whether it is possible to call
+        can_call = len([item for item in valid_actions if item['action'] == 'call']) > 0
+        if can_call:
+            # If so, compute the amount that needs to be called
+            call_amount = [item for item in valid_actions if item['action'] == 'call'][0]['amount']
+        else:
+            call_amount = 0
+
+        amount = None
+
+        # If the win rate is large enough, then raise
+        if win_rate > 0.5:
+            raise_amount_options = [item for item in valid_actions if item['action'] == 'raise'][0]['amount']
+            if win_rate > 0.85:
+                # If it is extremely likely to win, then raise as much as possible
+                action = 'raise'
+                amount = raise_amount_options['max']
+            elif win_rate > 0.75:
+                # If it is likely to win, then raise by the minimum amount possible
+                action = 'raise'
+                amount = raise_amount_options['min']
+            else:
+                # If there is a chance to win, then call
+                action = 'call'
+        else:
+            action = 'call' if can_call and call_amount == 0 else 'fold'
+
+        # Set the amount
+        if amount is None:
+            items = [item for item in valid_actions if item['action'] == action]
+            amount = items[0]['amount']
+
+
 
     def evaluation(self, player_pos, round_state):
         total_opp = 0
@@ -64,6 +121,7 @@ class PokerBot(BasePokerPlayer):
                 break
 
         if depth * numOfPlayers == current_depth:
+            print('done')
             score = self.evaluation(player_pos, round_state)
             action, amount = self.bluff(score, hole, community, valid_actions)
 
@@ -76,7 +134,7 @@ class PokerBot(BasePokerPlayer):
                 if result > score:
                     score = result
                     move = action['action']
-
+            print('check1', current_depth)
             return move, score
 
         else:
@@ -86,6 +144,7 @@ class PokerBot(BasePokerPlayer):
                 if result < score:
                     score = result
                     move = action['action']
+            print('check2', current_depth)
             return move, score
     
     def expectimax(self, info_to_pass):
@@ -158,7 +217,12 @@ class PokerBot(BasePokerPlayer):
         my_score = HandEvaluator.eval_hand(hole_card, community_card)
         return 1 if my_score >= max(opponents_score) else 0
 
-    def bluff(self,score, hole, community, valid_actions):
+    def bluff(self, score, hole, community, valid_actions, bluffAlgoMain = 0):
+
+        if bluffAlgoMain == 1 and score == -999999:
+            score = eval_cards.selfScorer(hole)
+
+
         win_rate = self.estimate_win_rate(100, 3, hole, community)
         cards = hole + community
         next_action = 'call'; amount = None
@@ -168,7 +232,6 @@ class PokerBot(BasePokerPlayer):
             multiplier = 1
 
         score_helper = score*multiplier
-        print(win_rate)
         # Check whether it is possible to call
         can_call = len([item for item in valid_actions if item['action'] == 'call']) > 0
         if can_call:
@@ -176,13 +239,17 @@ class PokerBot(BasePokerPlayer):
             call_amount = [item for item in valid_actions if item['action'] == 'call'][0]['amount']
         else:
             call_amount = 0
-        print(call_amount)
+
+        #print(win_rate, call_amount)
+
+        # tried different raise amount thresholds, doing different raise amounts at different thresholds yielded more stable results
+        #      however, the overall score was notably lower rather than going max or min
         if score_helper * win_rate > 200:
             raise_amount_options = [item for item in valid_actions if item['action'] == 'raise'][0]['amount']
-            if score_helper > 250:
+            if score_helper > 650:
                 next_action = 'raise'
                 amount = raise_amount_options['max']
-            elif score_helper > 350:
+            elif score_helper > 450:
                 next_action = 'raise'
                 amount = raise_amount_options['min']
             else:
@@ -196,7 +263,7 @@ class PokerBot(BasePokerPlayer):
         if amount is None:
             items = [item for item in valid_actions if item['action'] == next_action]
             amount = items[0]['amount']
-        print(next_action, amount)
+        #print(next_action, amount)
         return next_action, amount
 
     def declare_action(self, valid_actions, hole_card, round_state):
@@ -215,7 +282,9 @@ class PokerBot(BasePokerPlayer):
 
         #return a pair: action, amount = call_action_info["action"], call_action_info["amount"]
 
-        if self.algID == 1:
+        if self.algID == 0:
+            self.fishPlayerAlgorithm(valid_actions, hole_card, round_state)
+        elif self.algID == 1:
             action, amount = self.minimax(player_pos, -1, valid_actions, round_state)
             return action, amount # action returned here is sent to the poker engine
         elif self.algID == 2:
@@ -223,8 +292,7 @@ class PokerBot(BasePokerPlayer):
         elif self.algID == 3:
             return self.expectimax(round_state)
         else:
-            print('error check')
-            return 'fold', 0
+            return self.bluff(-999999, hole_card, round_state['community_card'], valid_actions, 1)
 
     def receive_game_start_message(self, game_info):
         self.game_info = game_info
