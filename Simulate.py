@@ -8,14 +8,14 @@ from pokerbot import PokerBot
 import numpy as np
 
 if __name__ == '__main__':
-    pokerBot = PokerBot(2)
+    pokerBot = PokerBot(1)
     testBot = testBot()
 
     # The stack log contains the stacks of the Data Blogger bot after each game (the initial stack is 100)
     stack_log = []
     round_number = 1
     average_winning=0
-    for round in range(5):
+    for round in range(10):
         p1 = testBot; p2 = CallBot() ; p3 = pokerBot
 
         config = setup_config(max_round=5, initial_stack=1000, small_blind_amount=5)

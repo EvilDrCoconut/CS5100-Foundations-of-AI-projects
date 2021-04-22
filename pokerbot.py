@@ -103,15 +103,18 @@ class PokerBot(BasePokerPlayer):
     def gen_next_round_state(self,player_pos,action,round_state):
         next_round_state = round_state
         if action=="fold":
+            #print('fold')
             return next_round_state
         elif action=="call":
+            #print('call')
             index = len(next_round_state['action_histories'])-1
-            call_amount = next_round_state['action_histories'][index]['amount']
+            call_amount = next_round_state['action_histories']['preflop'][index]['amount']
             next_round_state['pot']['main']['amount']+=call_amount
             next_round_state['seats'][player_pos]['stack']-=call_amount
             next_round_state['action_histories'][index+1] = {'action': 'CALL', 'amount': call_amount,  'uuid': next_round_state['seats'][player_pos]['uuid']}
             return next_round_state
         else:
+            #print('raise')
             index = len(next_round_state['action_histories']['preflop']) - 1
             raise_amount = 1.1*next_round_state['action_histories']['preflop'][index]['amount']
             next_round_state['pot']['main']['amount'] += raise_amount
@@ -126,24 +129,19 @@ class PokerBot(BasePokerPlayer):
         player_pos:The position of player
         depth: set it to 2
         '''
-
         community = round_state['community_card']
         hole = self.hole_card
         current_depth += 1
         numOfPlayers = len(round_state['seats'])
         depth = numOfPlayers-1
-        '''
-                for index in range(player_pos, numOfPlayers - 1):
+
+        for index in range(player_pos, numOfPlayers - 1):
             if index + 1 <= numOfPlayers and round_state['seats'][index + 1].is_active():
                 player_pos = index + 1
                 break
             elif index + 1 >= numOfPlayers:
                 player_pos = 0
                 break
-        '''
-
-        if player_pos>=numOfPlayers:
-            player_pos=0
         if depth * numOfPlayers == current_depth:
             #print('done')
 
@@ -154,7 +152,7 @@ class PokerBot(BasePokerPlayer):
         if current_depth % len(round_state['seats']) == 0:
             max_value = float('-Inf')
             for action in valid_actions:
-                max_move, result = self.minimax(player_pos+1, current_depth, valid_actions, self.gen_next_round_state(player_pos,action,round_state))
+                max_move, result = self.minimax(player_pos, current_depth, valid_actions, self.gen_next_round_state(player_pos,action['action'],round_state))
                 if result > max_value:
                     max_value = result
                     move = max_move
@@ -164,7 +162,7 @@ class PokerBot(BasePokerPlayer):
         else:
             min_value = float('Inf')
             for action in valid_actions:
-                min_move, result = self.minimax(player_pos+1, current_depth, valid_actions, self.gen_next_round_state(player_pos,action,round_state))
+                min_move, result = self.minimax(player_pos, current_depth, valid_actions, self.gen_next_round_state(player_pos,action,round_state))
                 if result < min_value:
                     min_value = result
                     move = min_move
@@ -198,7 +196,6 @@ class PokerBot(BasePokerPlayer):
             movement = ""
             for action in valid_actions:
                 move,score = self.alpha_beta_pruning(player_pos, current_depth, valid_actions, self.gen_next_round_state(player_pos,action,round_state), alpha,beta)
-                print(move,score)
                 if score > max_value:
                     max_value = score
                     movement = move
@@ -212,7 +209,6 @@ class PokerBot(BasePokerPlayer):
             min_value = float('Inf')
             for action in valid_actions:
                 move,score = self.alpha_beta_pruning(player_pos, current_depth, valid_actions,self.gen_next_round_state(player_pos,action,round_state), alpha,beta)
-                print(move,score)
                 if score < min_value:
                     min_value = score
                     movement = move
