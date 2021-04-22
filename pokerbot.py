@@ -109,43 +109,47 @@ class PokerBot(BasePokerPlayer):
         community = round_state['community_card']
         hole = self.hole_card
         current_depth += 1
-        score = 0
         numOfPlayers = len(round_state['seats'])
-        depth = numOfPlayers - 1
-        for index in range(player_pos, numOfPlayers - 1):
+        depth = numOfPlayers-1
+        '''
+                for index in range(player_pos, numOfPlayers - 1):
             if index + 1 <= numOfPlayers and round_state['seats'][index + 1].is_active():
                 player_pos = index + 1
                 break
             elif index + 1 >= numOfPlayers:
                 player_pos = 0
                 break
+        '''
 
+        if player_pos>=numOfPlayers:
+            player_pos=0
         if depth * numOfPlayers == current_depth:
-            print('done')
+            #print('done')
+
             score = self.evaluation(player_pos, round_state)
             action, amount = self.bluff(score, hole, community, valid_actions)
-
+            print(action)
             return action, amount
-
-        if current_depth % numOfPlayers == 0:
-            score = float('-Inf')
+        move = ''
+        if current_depth % len(round_state['seats']) == 0:
+            max_value = float('-Inf')
             for action in valid_actions:
-                max_move, result = self.minimax(player_pos, current_depth, valid_actions, round_state)
-                if result > score:
-                    score = result
-                    move = action['action']
-            print('check1', current_depth)
-            return move, score
+                max_move, result = self.minimax(player_pos+1, current_depth, valid_actions, round_state)
+                if result > max_value:
+                    max_value = result
+                    move = max_move
+
+            return move, max_value
 
         else:
-            score = float('Inf')
+            min_value = float('Inf')
             for action in valid_actions:
-                min_move, result = self.minimax(player_pos, current_depth, valid_actions, round_state)
-                if result < score:
-                    score = result
-                    move = action['action']
-            print('check2', current_depth)
-            return move, score
+                min_move, result = self.minimax(player_pos+1, current_depth, valid_actions, round_state)
+                if result < min_value:
+                    min_value = result
+                    move = min_move
+
+            return move, min_value
     
     def expectimax(self, info_to_pass):
         play_suggestion = None; util = 0
@@ -176,7 +180,7 @@ class PokerBot(BasePokerPlayer):
                 move,score = self.alpha_beta_pruning(player_pos, current_depth, valid_actions, round_state, alpha,beta)
                 if score > max_value:
                     max_value = score
-                    movement = action['action']
+                    movement = move
                     if max_value > beta:
                         return movement, max_value
                     if max_value > alpha:
@@ -189,7 +193,7 @@ class PokerBot(BasePokerPlayer):
                 move,score = self.alpha_beta_pruning(player_pos, current_depth, valid_actions,round_state, alpha,beta)
                 if score < min_value:
                     min_value = score
-                    movement = action['action']
+                    movement = move
                     if min_value < alpha:
                         return movement, min_value
                     if min_value < beta:

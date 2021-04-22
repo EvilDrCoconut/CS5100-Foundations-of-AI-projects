@@ -8,7 +8,7 @@ from pokerbot import PokerBot
 import numpy as np
 
 if __name__ == '__main__':
-    pokerBot = PokerBot(4)
+    pokerBot = PokerBot(2)
     testBot = testBot()
 
     # The stack log contains the stacks of the Data Blogger bot after each game (the initial stack is 100)
@@ -27,5 +27,5 @@ if __name__ == '__main__':
         round_number += 1
         average_winning+=int(np.mean(stack_log))
         print('Avg. stack:', '%d' % (int(np.mean(stack_log))))
-        #print('round finished', round_number)
+        print('round finished', round_number)
     print(average_winning/round_number)
