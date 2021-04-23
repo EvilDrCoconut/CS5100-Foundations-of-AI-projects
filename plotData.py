@@ -6,6 +6,13 @@ def plotData():
 
     data = []
 
+    x = []
+
+    pop = 1
+    while pop < 101:
+        x.append(pop)
+        pop += 1
+
     pbminmax = []
     pbAlphaBeta = []
     pbBLuff = []
@@ -14,7 +21,7 @@ def plotData():
     pbAlphaBeta_vs_pbBluff = []
     pbMinMax_vs_pbAlphaBeta = []
 
-    file = open('data.txt', 'r')
+    file = open('data2.txt', 'r')
     
     n = 0
     while n < 6:
@@ -29,12 +36,13 @@ def plotData():
                 try:
                     datahelper.append(int(item))
                 except:
-                    print('whatever')
+                    pass
             data.append(datahelper)
-            print(data)
-            n += 1
-
-    plt.scatter(x = 150, y = data[0])
+            #print(data)
+        n += 1
+    data[0].sort()
+    print(len(x), len(data[0]))
+    plt.scatter(x, data[0])
     plt.show()
 
 def main():
