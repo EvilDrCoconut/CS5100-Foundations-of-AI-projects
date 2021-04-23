@@ -73,7 +73,7 @@ def eval_cards(cards, bluffAlgoMain = 0):
     # Three of a kind
     for rank in ranks_by_card.keys():
         if len(ranks_by_card[rank]) == 3:
-            if bluffMainAlgo == 0: return 12
+            if bluffAlgoMain == 0: return 12
             else: return 15
 
     # Pairs
