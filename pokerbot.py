@@ -110,27 +110,11 @@ class PokerBot(BasePokerPlayer):
             #print('call')
             call_amount = 0
             index = len(next_round_state['action_histories']['preflop'])-1
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
->>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
-=======
->>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
             #print(next_round_state['action_histories']['preflop'][index])
             #call_amount = next_round_state['action_histories']['preflop'][index]['amount']
-=======
+
             print(next_round_state['action_histories']['preflop'][index]['amount'])
->>>>>>> bbfdfcfd8976835d086c61f57ce0d7fb592bdc75
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
-=======
->>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
-=======
->>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
+
             for i in reversed(next_round_state['action_histories']['preflop']):
                 if 'amount'not in i.keys():
                     call_amount = 15
@@ -142,28 +126,21 @@ class PokerBot(BasePokerPlayer):
             #print('raise')
             raise_amount = 0
             index = len(next_round_state['action_histories']['preflop']) - 1
-<<<<<<< HEAD
+
             #print(next_round_state['action_histories']['preflop'][index])
             #raise_amount = 1.1*next_round_state['action_histories']['preflop'][index]['amount']
             for i in reversed(next_round_state['action_histories']['preflop']):
                 if 'amount'not in i.keys():
                     raise_amount = 15
-=======
+
             for i in reversed(next_round_state['action_histories']['preflop']):
                 if 'amount'not in i.keys():
                     raise_amount = 15
-<<<<<<< HEAD
-=======
+
+
 
             print(next_round_state['action_histories']['preflop'][index])
->>>>>>> bbfdfcfd8976835d086c61f57ce0d7fb592bdc75
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
-=======
->>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
-=======
->>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
+
             next_round_state['pot']['main']['amount'] += raise_amount
             next_round_state['seats'][player_pos]['stack'] -= raise_amount
             next_round_state['action_histories'][index + 1] = {'action': 'RAISE', 'amount': raise_amount,
@@ -181,7 +158,7 @@ class PokerBot(BasePokerPlayer):
         current_depth += 1
         numOfPlayers = len(round_state['seats'])
         depth = numOfPlayers-1
-<<<<<<< HEAD
+
         call_amount = 0
         for i in reversed(round_state['action_histories']['preflop']):
             if 'amount' in i.keys():
@@ -190,18 +167,12 @@ class PokerBot(BasePokerPlayer):
                 call_amount = 15
         if player_pos>=numOfPlayers:
             player_pos=0
-=======
+
 
         if player_pos>=numOfPlayers:
             player_pos=0
 
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
-=======
->>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
-=======
->>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
+
         if depth * numOfPlayers == current_depth:
             #print('done')
 
@@ -242,15 +213,15 @@ class PokerBot(BasePokerPlayer):
         current_depth += 1
         numOfPlayers = len(round_state['seats'])
         depth = numOfPlayers - 1
-<<<<<<< HEAD
+
         
         if player_pos>=numOfPlayers:
             player_pos=0
         
-=======
+
         if player_pos>=numOfPlayers:
             player_pos=0
->>>>>>> bbfdfcfd8976835d086c61f57ce0d7fb592bdc75
+
         if depth * numOfPlayers == current_depth:
             score = self.evaluation(player_pos, round_state)
             action, amount = self.bluff(score, hole, community, valid_actions)
