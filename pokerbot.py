@@ -111,11 +111,26 @@ class PokerBot(BasePokerPlayer):
             call_amount = 0
             index = len(next_round_state['action_histories']['preflop'])-1
 <<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
+=======
+>>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
             #print(next_round_state['action_histories']['preflop'][index])
             #call_amount = next_round_state['action_histories']['preflop'][index]['amount']
 =======
             print(next_round_state['action_histories']['preflop'][index]['amount'])
 >>>>>>> bbfdfcfd8976835d086c61f57ce0d7fb592bdc75
+<<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
+=======
+>>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
+=======
+>>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
             for i in reversed(next_round_state['action_histories']['preflop']):
                 if 'amount'not in i.keys():
                     call_amount = 15
@@ -137,9 +152,18 @@ class PokerBot(BasePokerPlayer):
             for i in reversed(next_round_state['action_histories']['preflop']):
                 if 'amount'not in i.keys():
                     raise_amount = 15
+<<<<<<< HEAD
+=======
 
             print(next_round_state['action_histories']['preflop'][index])
 >>>>>>> bbfdfcfd8976835d086c61f57ce0d7fb592bdc75
+<<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
+=======
+>>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
+=======
+>>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
             next_round_state['pot']['main']['amount'] += raise_amount
             next_round_state['seats'][player_pos]['stack'] -= raise_amount
             next_round_state['action_histories'][index + 1] = {'action': 'RAISE', 'amount': raise_amount,
@@ -157,10 +181,27 @@ class PokerBot(BasePokerPlayer):
         current_depth += 1
         numOfPlayers = len(round_state['seats'])
         depth = numOfPlayers-1
+<<<<<<< HEAD
+        call_amount = 0
+        for i in reversed(round_state['action_histories']['preflop']):
+            if 'amount' in i.keys():
+                call_amount = i['amount']
+            else:
+                call_amount = 15
+        if player_pos>=numOfPlayers:
+            player_pos=0
+=======
 
         if player_pos>=numOfPlayers:
             player_pos=0
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
+=======
+>>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
+=======
+>>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
         if depth * numOfPlayers == current_depth:
             #print('done')
 
@@ -174,8 +215,10 @@ class PokerBot(BasePokerPlayer):
                 max_move, result = self.minimax(player_pos+1, current_depth, valid_actions, self.gen_next_round_state(player_pos,action['action'],round_state))
                 if result > max_value:
                     max_value = result
-                    move = max_move
+                    move = action['action']
 
+            if move=='call':
+                max_value = call_amount
             return move, max_value
 
         else:
@@ -184,8 +227,9 @@ class PokerBot(BasePokerPlayer):
                 min_move, result = self.minimax(player_pos+1, current_depth, valid_actions, self.gen_next_round_state(player_pos,action,round_state))
                 if result < min_value:
                     min_value = result
-                    move = min_move
-
+                    move = action['action']
+            if move=='call':
+                min_value = call_amount
             return move, min_value
     
     def expectimax(self, info_to_pass):
@@ -334,6 +378,7 @@ class PokerBot(BasePokerPlayer):
             self.fishPlayerAlgorithm(valid_actions, hole_card, round_state)
         elif self.algID == 1:
             action, amount = self.minimax(player_pos, -1, valid_actions, round_state)
+            print(action,amount)
             return action, amount # action returned here is sent to the poker engine
         elif self.algID == 2:
             return self.alpha_beta_pruning(player_pos, -1, valid_actions, round_state, 99999, -99999)
