@@ -9,14 +9,10 @@ import numpy as np
 import csv
 
 if __name__ == '__main__':
-
     pokerBotMinMax = PokerBot(1)
     pokerBotAlphaBeta = PokerBot(2)
     pokerBotExpecti = PokerBot(3)
     pokerBotBluff = PokerBot(4)
-
-
-    pokerBot = PokerBot(1)
 
     testBot = testBot()
 
