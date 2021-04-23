@@ -110,8 +110,12 @@ class PokerBot(BasePokerPlayer):
             #print('call')
             call_amount = 0
             index = len(next_round_state['action_histories']['preflop'])-1
+<<<<<<< HEAD
             #print(next_round_state['action_histories']['preflop'][index])
             #call_amount = next_round_state['action_histories']['preflop'][index]['amount']
+=======
+            print(next_round_state['action_histories']['preflop'][index]['amount'])
+>>>>>>> bbfdfcfd8976835d086c61f57ce0d7fb592bdc75
             for i in reversed(next_round_state['action_histories']['preflop']):
                 if 'amount'not in i.keys():
                     call_amount = 15
@@ -123,11 +127,19 @@ class PokerBot(BasePokerPlayer):
             #print('raise')
             raise_amount = 0
             index = len(next_round_state['action_histories']['preflop']) - 1
+<<<<<<< HEAD
             #print(next_round_state['action_histories']['preflop'][index])
             #raise_amount = 1.1*next_round_state['action_histories']['preflop'][index]['amount']
             for i in reversed(next_round_state['action_histories']['preflop']):
                 if 'amount'not in i.keys():
                     raise_amount = 15
+=======
+            for i in reversed(next_round_state['action_histories']['preflop']):
+                if 'amount'not in i.keys():
+                    raise_amount = 15
+
+            print(next_round_state['action_histories']['preflop'][index])
+>>>>>>> bbfdfcfd8976835d086c61f57ce0d7fb592bdc75
             next_round_state['pot']['main']['amount'] += raise_amount
             next_round_state['seats'][player_pos]['stack'] -= raise_amount
             next_round_state['action_histories'][index + 1] = {'action': 'RAISE', 'amount': raise_amount,
@@ -159,7 +171,7 @@ class PokerBot(BasePokerPlayer):
         if current_depth % len(round_state['seats']) == 0:
             max_value = float('-Inf')
             for action in valid_actions:
-                max_move, result = self.minimax(player_pos, current_depth, valid_actions, self.gen_next_round_state(player_pos,action['action'],round_state))
+                max_move, result = self.minimax(player_pos+1, current_depth, valid_actions, self.gen_next_round_state(player_pos,action['action'],round_state))
                 if result > max_value:
                     max_value = result
                     move = max_move
@@ -169,7 +181,7 @@ class PokerBot(BasePokerPlayer):
         else:
             min_value = float('Inf')
             for action in valid_actions:
-                min_move, result = self.minimax(player_pos, current_depth, valid_actions, self.gen_next_round_state(player_pos,action,round_state))
+                min_move, result = self.minimax(player_pos+1, current_depth, valid_actions, self.gen_next_round_state(player_pos,action,round_state))
                 if result < min_value:
                     min_value = result
                     move = min_move
@@ -186,10 +198,15 @@ class PokerBot(BasePokerPlayer):
         current_depth += 1
         numOfPlayers = len(round_state['seats'])
         depth = numOfPlayers - 1
+<<<<<<< HEAD
         
         if player_pos>=numOfPlayers:
             player_pos=0
         
+=======
+        if player_pos>=numOfPlayers:
+            player_pos=0
+>>>>>>> bbfdfcfd8976835d086c61f57ce0d7fb592bdc75
         if depth * numOfPlayers == current_depth:
             score = self.evaluation(player_pos, round_state)
             action, amount = self.bluff(score, hole, community, valid_actions)

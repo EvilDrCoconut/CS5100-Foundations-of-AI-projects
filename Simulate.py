@@ -9,11 +9,15 @@ import numpy as np
 import csv
 
 if __name__ == '__main__':
+<<<<<<< HEAD
     pokerBotMinMax = PokerBot(1)
     pokerBotAlphaBeta = PokerBot(2)
     pokerBotExpecti = PokerBot(3)
     pokerBotBluff = PokerBot(4)
 
+=======
+    pokerBot = PokerBot(1)
+>>>>>>> bbfdfcfd8976835d086c61f57ce0d7fb592bdc75
     testBot = testBot()
 
 
