@@ -31,7 +31,7 @@ class PokerBot(BasePokerPlayer):
         self.wins = 0
         self.losses = 0
 
-        self.whatAlgo()
+        #self.whatAlgo()
 
     def set_algorithm(self, algID):
         # A debug function allowing someone to set the bot's algorithm at any time.
@@ -51,9 +51,9 @@ class PokerBot(BasePokerPlayer):
         else:
             print('BLuff Algorithm')
 
-    def fishPlayerAlgorithm(valid_actions, hole_card, round_state):
+    def fishPlayerAlgorithm(self, valid_actions, hole_card, round_state):
                 # Estimate the win rate
-        win_rate = estimate_win_rate(100, self.num_players, hole_card, round_state['community_card'])
+        win_rate = self.estimate_win_rate(100, 2, hole_card, round_state['community_card'])
 
         # Check whether it is possible to call
         can_call = len([item for item in valid_actions if item['action'] == 'call']) > 0
@@ -108,16 +108,26 @@ class PokerBot(BasePokerPlayer):
             return next_round_state
         elif action=="call":
             #print('call')
-            index = len(next_round_state['action_histories'])-1
-            call_amount = next_round_state['action_histories']['preflop'][index]['amount']
+            call_amount = 0
+            index = len(next_round_state['action_histories']['preflop'])-1
+            #print(next_round_state['action_histories']['preflop'][index])
+            #call_amount = next_round_state['action_histories']['preflop'][index]['amount']
+            for i in reversed(next_round_state['action_histories']['preflop']):
+                if 'amount'not in i.keys():
+                    call_amount = 15
             next_round_state['pot']['main']['amount']+=call_amount
             next_round_state['seats'][player_pos]['stack']-=call_amount
             next_round_state['action_histories'][index+1] = {'action': 'CALL', 'amount': call_amount,  'uuid': next_round_state['seats'][player_pos]['uuid']}
             return next_round_state
         else:
             #print('raise')
+            raise_amount = 0
             index = len(next_round_state['action_histories']['preflop']) - 1
-            raise_amount = 1.1*next_round_state['action_histories']['preflop'][index]['amount']
+            #print(next_round_state['action_histories']['preflop'][index])
+            #raise_amount = 1.1*next_round_state['action_histories']['preflop'][index]['amount']
+            for i in reversed(next_round_state['action_histories']['preflop']):
+                if 'amount'not in i.keys():
+                    raise_amount = 15
             next_round_state['pot']['main']['amount'] += raise_amount
             next_round_state['seats'][player_pos]['stack'] -= raise_amount
             next_round_state['action_histories'][index + 1] = {'action': 'RAISE', 'amount': raise_amount,
@@ -136,13 +146,9 @@ class PokerBot(BasePokerPlayer):
         numOfPlayers = len(round_state['seats'])
         depth = numOfPlayers-1
 
-        for index in range(player_pos, numOfPlayers - 1):
-            if index + 1 <= numOfPlayers and round_state['seats'][index + 1].is_active():
-                player_pos = index + 1
-                break
-            elif index + 1 >= numOfPlayers:
-                player_pos = 0
-                break
+        if player_pos>=numOfPlayers:
+            player_pos=0
+
         if depth * numOfPlayers == current_depth:
             #print('done')
 
@@ -180,13 +186,10 @@ class PokerBot(BasePokerPlayer):
         current_depth += 1
         numOfPlayers = len(round_state['seats'])
         depth = numOfPlayers - 1
-        for index in range(player_pos, numOfPlayers - 1):
-            if index + 1 <= numOfPlayers and round_state['seats'][index + 1].is_active():
-                player_pos = index + 1
-                break
-            elif index + 1 >= numOfPlayers:
-                player_pos = 0
-                break
+        
+        if player_pos>=numOfPlayers:
+            player_pos=0
+        
         if depth * numOfPlayers == current_depth:
             score = self.evaluation(player_pos, round_state)
             action, amount = self.bluff(score, hole, community, valid_actions)
@@ -196,7 +199,7 @@ class PokerBot(BasePokerPlayer):
             max_value = float('-Inf')
             movement = ""
             for action in valid_actions:
-                move,score = self.alpha_beta_pruning(player_pos, current_depth, valid_actions, self.gen_next_round_state(player_pos,action,round_state), alpha,beta)
+                move,score = self.alpha_beta_pruning(player_pos+1, current_depth, valid_actions, self.gen_next_round_state(player_pos,action,round_state), alpha,beta)
                 if score > max_value:
                     max_value = score
                     movement = move
@@ -209,7 +212,7 @@ class PokerBot(BasePokerPlayer):
 
             min_value = float('Inf')
             for action in valid_actions:
-                move,score = self.alpha_beta_pruning(player_pos, current_depth, valid_actions,self.gen_next_round_state(player_pos,action,round_state), alpha,beta)
+                move,score = self.alpha_beta_pruning(player_pos+1, current_depth, valid_actions,self.gen_next_round_state(player_pos,action,round_state), alpha,beta)
                 if score < min_value:
                     min_value = score
                     movement = move
@@ -246,7 +249,7 @@ class PokerBot(BasePokerPlayer):
             score = eval_cards.selfScorer(hole)
 
 
-        win_rate = self.estimate_win_rate(100, 3, hole, community)
+        win_rate = self.estimate_win_rate(10000, 5, hole, community)
         cards = hole + community
         next_action = 'call'; amount = None
 
