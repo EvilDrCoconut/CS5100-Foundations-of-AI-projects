@@ -1,4 +1,5 @@
 import random
+from random import choices
 import eval_cards
 from pypokerengine.players import BasePokerPlayer
 from pypokerengine.engine.poker_constants import PokerConstants
@@ -280,7 +281,12 @@ class PokerBot(BasePokerPlayer):
             if can_call and call_amount == 0:
                 next_action = 'call'
             else:
-                next_action = 'fold'
+                explore = choices([0,1], [.6, .4])
+                #print(explore)
+                if explore == 0:
+                    next_action = 'fold'
+                elif explore == 1 and call_amount <= 50:
+                    next_action = 'call'
 
         if amount is None:
             items = [item for item in valid_actions if item['action'] == next_action]

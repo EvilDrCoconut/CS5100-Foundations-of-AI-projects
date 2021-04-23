@@ -1,5 +1,5 @@
 # function to evaluate strength of hand, by robbie
-def eval_cards(cards):
+def eval_cards(cards, bluffAlgoMain = 0):
 
     suits_by_card = {}
     ranks_by_card = {}
@@ -36,7 +36,8 @@ def eval_cards(cards):
     # Find four card
     for rank in ranks_by_card.keys():
         if len(ranks_by_card[rank]) == 4:
-            return 22
+            if bluffAlgoMain == 0: return 22
+            else: return 25
 
     # Find full house
     hasThree = False
@@ -72,7 +73,8 @@ def eval_cards(cards):
     # Three of a kind
     for rank in ranks_by_card.keys():
         if len(ranks_by_card[rank]) == 3:
-            return 12
+            if bluffMainAlgo == 0: return 12
+            else: return 15
 
     # Pairs
     pairs = 0
@@ -82,7 +84,8 @@ def eval_cards(cards):
         if pairs == 2:
             return 8
         elif pairs == 1:
-            return 4
+            if bluffAlgoMain == 0 : return 4
+            else: return 6
 
 
 # method to score own hand if no other algorithm was used as heurisitc

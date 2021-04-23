@@ -8,7 +8,7 @@ from pokerbot import PokerBot
 import numpy as np
 
 if __name__ == '__main__':
-    pokerBot = PokerBot(1)
+    pokerBot = PokerBot(2)
     testBot = testBot()
 
     # The stack log contains the stacks of the Data Blogger bot after each game (the initial stack is 100)
