@@ -1,8 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
-import pandas as pd
-
 
 def plotData():
 
@@ -15,9 +13,6 @@ def plotData():
     pbMinMax_vs_pbBluff = []
     pbAlphaBeta_vs_pbBluff = []
     pbMinMax_vs_pbAlphaBeta = []
-
-    data = pd.read_csv ('data.csv')
-    results = pd.DataFrame(data, columns= ['pbMinMax','pbAlphaBeta','pbBluff','pbMinMaxVsPbBluff','pbAlphaBetaVsPbBluff','pbAlphaBetaVsPBMinMax'])
 
     file = open('data.txt', 'r')
     
