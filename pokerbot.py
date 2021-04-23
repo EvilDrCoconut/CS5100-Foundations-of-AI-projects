@@ -112,8 +112,11 @@ class PokerBot(BasePokerPlayer):
             index = len(next_round_state['action_histories']['preflop'])-1
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+>>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
 =======
 >>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
             #print(next_round_state['action_histories']['preflop'][index])
@@ -122,6 +125,9 @@ class PokerBot(BasePokerPlayer):
             print(next_round_state['action_histories']['preflop'][index]['amount'])
 >>>>>>> bbfdfcfd8976835d086c61f57ce0d7fb592bdc75
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
+=======
 >>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
 =======
 >>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
@@ -152,6 +158,9 @@ class PokerBot(BasePokerPlayer):
             print(next_round_state['action_histories']['preflop'][index])
 >>>>>>> bbfdfcfd8976835d086c61f57ce0d7fb592bdc75
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
+=======
 >>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
 =======
 >>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
@@ -187,6 +196,9 @@ class PokerBot(BasePokerPlayer):
             player_pos=0
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
+=======
 >>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
 =======
 >>>>>>> 45d1ddc353cf8078fb153231c1ba1a0dc7dac433
