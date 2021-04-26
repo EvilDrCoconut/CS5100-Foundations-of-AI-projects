@@ -5,7 +5,7 @@ from pypokerengine.players import BasePokerPlayer
 import numpy as np
 from sklearn.neural_network import MLPRegressor
 
-
+# This is a basic class from PyPokerEngine used to make sure bots could play a game
 class CallBot(BasePokerPlayer):
     def declare_action(self, valid_actions, hole_card, round_state):
         actions = [item for item in valid_actions if item['action'] in ['call']]

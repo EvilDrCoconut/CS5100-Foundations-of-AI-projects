@@ -21,6 +21,7 @@ def plotData():
     pbAlphaBeta_vs_pbBluff = []
     pbMinMax_vs_pbAlphaBeta = []
 
+    # issue parsing csv file, copied to text and parsed from there
     file = open('data2.txt', 'r')
     
     n = 0

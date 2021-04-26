@@ -20,7 +20,6 @@ if __name__ == '__main__':
     stack_log = []
     pbminmax = []
     pbAlphaBeta = []
-    pbExpecti = []
     pbBLuff = []
 
     pbMinMax_vs_pbBluff = []
@@ -56,22 +55,6 @@ if __name__ == '__main__':
         print('Avg. stack:', '%d' % (int(np.mean(stack_log))))
     print(pbAlphaBeta)
     print('\n', 'Next Test', '\n')
-
-    '''
-    for round in range(100):
-        p1 = testBot ; p2 = pokerBotExpecti
-
-        config = setup_config(max_round=5, initial_stack=1000, small_blind_amount=5)
-        config.register_player(name="p1", algorithm=p1)
-        config.register_player(name="p2", algorithm=p2)
-        game_result = start_poker(config, verbose=0)
-
-        stack_log.append([player['stack'] for player in game_result['players'] if player['uuid'] == pokerBot.uuid])
-        pbExpecti.append([player['stack'] for player in game_result['players'] if player['uuid'] == pokerBot.uuid])
-        print('Avg. stack:', '%d' % (int(np.mean(stack_log))))
-    print(pbExpecti)
-    print('\n', 'Next Test', '\n')
-    '''
     
     stack_log = []
     for round in range(100):

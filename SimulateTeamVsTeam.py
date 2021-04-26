@@ -7,6 +7,8 @@ import numpy as np
 import csv
 from agent import Agent
 
+
+# This was a set up simulation for the Q-Learning bots vs the non learning bots
 if __name__ == '__main__':
     pokerBotMinMax = PokerBot(1)
     pokerBotAlphaBeta = PokerBot(2)
